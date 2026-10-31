@@ -1,16 +1,24 @@
-# DecorWall LA — website source
+# DecorWall LA
 
-Site: https://decorwallla.com (Porkbun Secure Static Hosting)
+Website for DecorWall LA: media walls, slat walls, stone and accent walls in Los Angeles.
 
-## How it works
-- `build.py` + `data_cities.py` / `data_services.py` / `data_styles.py` — the generator and content data.
-- `assets/` — images and styles used by the generator.
-- `dist/` — the built site (539 pages). This is exactly what gets uploaded to the hosting.
+## How it is built
+- `index.html` is the home page, built by hand (hero, wall builder, packages).
+- `site/build.py` generates every other page (services, styles, 86 cities x 5 services, cost, process, FAQ...)
+  in the same design, and fills the home page's header, extra blocks and footer.
+- `site/data/` holds the content (cities, services, styles, FAQ variants). It is read as plain data.
+- `assets/site.css` and `assets/site.js` are shared by every page; `assets/styles/` and `assets/projects/` hold the
+  full-resolution photos; `images/` holds the home page photos and material textures.
 
-## Making changes
-1. Edit the generator or data files (never edit `dist/` by hand).
-2. Run `python3 build.py` to rebuild `dist/`.
-3. Upload the changed files from `dist/` to Porkbun hosting (FTP: pixie-ss1-ftp.porkbun.com, user decorwallla.com).
-4. Commit the change here so every edit is tracked.
+## Build
+```
+python3 site/build.py            # dist/     clean URLs, upload this folder to Porkbun (FTP) as before
+python3 site/build.py --preview  # preview/  relative links, opens straight from the files
+```
+Lead forms post to hello@decorwallla.com via FormSubmit. dist/ is committed so every upload is tracked.
 
-Lead form on the site posts to hello@decorwallla.com via FormSubmit.
+## Still to do
+- Wall builder: the project and style starting prices are real; the add-on prices are placeholders at the top of
+  the last `<script>` in `index.html`.
+- The home perks (Free / Custom / Local) and copy carried over from the old site should be checked.
+- Suisse Int'l is a licensed font; until its files are added, Geist is used instead.

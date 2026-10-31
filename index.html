@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DecorWall LA</title>
+<meta name="description" content="Custom wood panels, decorative moldings, and accent wall installation in Los Angeles.">
+<meta name="theme-color" content="#0e0e0e">
+<link rel="preload" as="image" href="images/hero-1.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Geist stands in for Suisse Int'l (licensed) when it is not installed; Instrument Serif is used in the mobile menu. -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  /* Hero: the track gives the pinned hero room to scroll through each wall. */
+  .track { position: relative; }
+  .hero {
+    position: sticky; top: 0;
+    height: 100vh; height: 100svh; min-height: 620px;
+    overflow: hidden; isolation: isolate;
+  }
+
+  .media { position: absolute; inset: 0; z-index: -2; }
+  .slide { position: absolute; inset: 0; opacity: 0; }
+  .slide.is-active { opacity: 1; }
+  /* The walls are swapped while this veil is fully black. */
+  .veil {
+    position: absolute; inset: 0; z-index: 1; background: #000;
+    opacity: 0; transition: opacity var(--dip-out) ease-out;
+  }
+  .veil.is-on { opacity: 1; transition: opacity var(--dip-in) ease-in; }
+  .slide img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; display: block; }
+
+  .scrim {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 75% 70% at 50% 50%, rgba(10, 10, 10, 0) 45%, rgba(10, 10, 10, 0.5) 100%),
+      linear-gradient(180deg, rgba(10, 10, 10, 0.6) 0%, rgba(10, 10, 10, 0.25) 30%, rgba(10, 10, 10, 0) 48%),
+      linear-gradient(0deg, rgba(10, 10, 10, 0.78) 0%, rgba(10, 10, 10, 0.35) 28%, rgba(10, 10, 10, 0) 50%);
+  }
+
+  /* Headline on the bottom edge at the left, figures and actions bottom-right, wall tabs at the right; the centre stays clear for the wall. */
+  .copy { position: absolute; inset: 0; pointer-events: none; }
+  .copy a, .copy button { pointer-events: auto; }
+  /* The headline sits right on the bottom edge of the screen. */
+  /* The baseline of the headline lines up with the bottom of the main button (0.12em is the line's descent). */
+  .lead { position: absolute; left: var(--pad); bottom: calc(var(--pad) - .12em); font-size: clamp(42px, 6.6vw, 104px); }
+  .lead .title { font-size: 1em; }
+  .title {
+    margin: 0; font-size: clamp(44px, 6.6vw, 104px); font-weight: 300; line-height: .95; letter-spacing: -0.045em;
+  }
+  .t1, .t2 { display: block; white-space: nowrap; }
+  .t1 { animation: rise 1.3s var(--ease-out) .2s both; }
+  .t2 { animation: rise 1.3s var(--ease-out) .32s both; }
+  /* The headline is set light; "Inspire" alone stays at full weight. */
+  .accent { font-weight: 500; }
+  .content { position: absolute; right: var(--pad); bottom: var(--pad); max-width: 540px; }
+  .subtitle {
+    max-width: 440px; margin: clamp(18px, 2vw, 26px) 0 0; color: var(--muted);
+    font-size: clamp(15px, 1.15vw, 18px); font-weight: 300; line-height: 1.5;
+    animation: rise 1.3s var(--ease-out) .44s both;
+  }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; margin-top: clamp(22px, 2.6vw, 34px); animation: rise 1.3s var(--ease-out) .52s both; }
+  /* Reasons to reach out: three in a row, a large word over a short line. */
+  .perks {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(22px, 2.6vw, 40px);
+    margin: 0 0 clamp(20px, 2.2vw, 28px); padding: 0; list-style: none;
+    animation: rise 1.3s var(--ease-out) .4s both;
+  }
+  .perks b { display: block; font-size: clamp(26px, 2.3vw, 34px); font-weight: 300; line-height: 1; letter-spacing: -0.035em; }
+  .perks span { display: block; margin-top: 8px; color: var(--muted); font-size: 13px; font-weight: 300; line-height: 1.35; }
+  /* Style list: one row at the top centre, below the menu. */
+  .tabs {
+    position: absolute; top: clamp(112px, 15vh, 150px); left: 50%; transform: translateX(-50%);
+    display: flex; gap: clamp(18px, 2.2vw, 36px); white-space: nowrap;
+    animation: rise-tabs 1.3s var(--ease-out) .7s both;
+  }
+  @keyframes rise-tabs { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translateX(-50%); } }
+  .tab {
+    position: relative; flex: none; display: flex; align-items: center; gap: 10px; padding: 6px 0; border: 0; background: none; color: rgba(255, 255, 255, 0.55);
+    font: inherit; font-size: 15px; letter-spacing: -0.01em; white-space: nowrap; cursor: pointer;
+    transition: color .6s var(--ease-out);
+  }
+  .tab svg { width: 18px; height: 18px; flex: none; }
+  .tab:hover { color: var(--muted); }
+  .tab[aria-selected='true'] { color: var(--white); }
+  .tab[aria-selected='true'] { text-shadow: 0 0 14px rgba(255, 190, 120, .6); }
+  .tab:focus-visible { outline: 1px solid var(--white); outline-offset: 4px; }
+
+  /* Why section: light and quiet after the dark hero. One full photo, a short case, and a way on. */
+  .why {
+    --paper: #efeae2;
+    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: clamp(32px, 6vw, 110px);
+    min-height: 100vh; min-height: 100svh;
+    padding: 100px var(--pad) 56px;
+    background: var(--stone); color: var(--ink);
+  }
+  .why-title {
+    max-width: 14ch; margin: 0;
+    font-size: clamp(32px, 3.6vw, 58px); font-weight: 300; line-height: 1.03; letter-spacing: -0.045em;
+  }
+  .why-title strong { font-weight: 500; }
+  .why-lead {
+    max-width: 400px; margin: clamp(22px, 2.4vw, 32px) 0 0;
+    color: rgba(14, 14, 14, .62); font-size: clamp(15px, 1.15vw, 17px); font-weight: 300; line-height: 1.6;
+  }
+  .why-more {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: clamp(28px, 3vw, 40px);
+    padding-bottom: 6px;
+    font-size: 15px; letter-spacing: -0.01em; transition: border-color .3s, gap .4s var(--ease-out);
+  }
+  .why-more:hover { gap: 16px; border-color: var(--ink); }
+  .why-more svg { width: 16px; height: 16px; }
+  /* The photo is shown whole at its own proportions, so it is never cropped or blown up. */
+  .why-photo { position: relative; margin: 0; aspect-ratio: 2000 / 1497; overflow: hidden; }
+  .why-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* The photo opens in vertical slats, the reverse of the primary button's hover: thin strips of the
+     picture appear and widen until they close up into the whole image. */
+  @property --reveal { syntax: '<length>'; inherits: false; initial-value: 0px; }
+  .why-photo.reveal {
+    --reveal: 0px; opacity: 1; transform: none;
+    -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 var(--reveal), transparent var(--reveal) 40px);
+    mask-image: repeating-linear-gradient(90deg, #000 0 var(--reveal), transparent var(--reveal) 40px);
+    transition: --reveal 1.5s cubic-bezier(0.65, 0, 0.35, 1) .1s;
+  }
+  .why-photo.reveal.is-in { --reveal: 40px; }
+  .why-photo figcaption { position: absolute; left: 0; bottom: -28px; color: rgba(14, 14, 14, .5); font-size: 12px; }
+
+  @media (max-width: 900px) {
+    .why { grid-template-columns: 1fr; min-height: 0; padding: 96px var(--pad) 72px; }
+  }
+
+  /* Cost section: a wall builder. Options on the left, a to-scale preview of the wall on the right,
+     and a running estimate in the bar along the bottom of the screen. */
+  .calc { padding: clamp(110px, 12vw, 180px) var(--pad) clamp(80px, 9vw, 140px); }
+  .calc-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 60px; margin-bottom: clamp(40px, 5vw, 72px); }
+  .calc-title, .pk-title {
+    margin: 0; font-size: clamp(36px, 4.6vw, 72px); font-weight: 300; line-height: 1; letter-spacing: -0.045em;
+  }
+  .calc-title strong, .pk-title strong { font-weight: 500; }
+  .calc-intro, .pk-intro { max-width: 440px; margin: 0; color: var(--muted); font-size: 15px; font-weight: 300; line-height: 1.55; }
+  .calc-body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 5vw, 88px); align-items: start; }
+
+
+  /* The preview: the whole wall, floor to ceiling, drawn to scale. --ft is one foot in pixels and the
+     stage is sized by the script so the chosen wall width fills it. Materials are textures taken from
+     DecorWall's own project photos. */
+  .calc-side { position: sticky; top: 96px; }
+  .pv { position: relative; }
+  .pv-stage { --ft: 40px; position: relative; overflow: hidden; width: 100%; height: 300px; }
+  .pv-floor {
+    position: absolute; left: 0; right: 0; bottom: calc(var(--shift, 0px) * -1); height: calc(var(--ft) * .6);
+    background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .12) 0 1px, transparent 1px calc(var(--ft) * 1.6)),
+      linear-gradient(#c3a582, #a98a66);
+  }
+  .pv-base { left: calc(var(--w) * var(--ft) / -2); bottom: 0; width: calc(var(--w) * var(--ft)); height: calc(var(--ft) * .33); background: linear-gradient(#f4f0ea, #e7e1d8); box-shadow: 0 -1px 0 rgba(255, 255, 255, .6), 0 -2px 4px rgba(0, 0, 0, .12); }
+  .pv-slatled {
+    left: calc(var(--w) * var(--ft) / -2); bottom: 0; width: calc(var(--w) * var(--ft)); height: calc(var(--h) * var(--ft));
+    background: repeating-linear-gradient(90deg, transparent 0 calc(var(--ft) * 1.5 - 2px), rgba(255, 196, 120, .95) calc(var(--ft) * 1.5 - 2px) calc(var(--ft) * 1.5));
+    filter: blur(1.5px) drop-shadow(0 0 4px rgba(255, 170, 80, .9));
+  }
+  .pv-mantel { left: calc((var(--fw) + 1) * var(--ft) / -2); bottom: calc(var(--ft) * 2.85); width: calc((var(--fw) + 1) * var(--ft)); height: calc(var(--ft) * .28); background: linear-gradient(#8a6038, #5e3d22); box-shadow: 0 calc(var(--ft) * .15) calc(var(--ft) * .2) rgba(0, 0, 0, .35); }
+  /* Finish swatches in the chips */
+  .sw { display: inline-block; flex: none; width: 16px; height: 16px; margin: 0 2px -3px -4px; border-radius: 50%; background-size: 48px 100%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); }
+  .pv-room { position: absolute; left: 50%; bottom: calc(var(--ft) * .6 - var(--shift, 0px)); width: 0; height: 0; }
+  .pv-room > * { position: absolute; transition: opacity .5s var(--ease-out); }
+  .pv-wall { left: calc(var(--w) * var(--ft) / -2); bottom: 0; width: calc(var(--w) * var(--ft)); height: calc(var(--h) * var(--ft)); }
+  /* Light falls from the ceiling and the corners fall into soft shadow. */
+  .pv-wall::after {
+    content: ''; position: absolute; inset: 0;
+    background:
+      linear-gradient(rgba(255, 244, 228, .18), rgba(255, 244, 228, 0) 35%, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, .14)),
+      linear-gradient(90deg, rgba(0, 0, 0, .18), rgba(0, 0, 0, 0) 12%, rgba(0, 0, 0, 0) 88%, rgba(0, 0, 0, .18));
+  }
+  .tex-walnut { background: url(images/textures/walnut-slat.webp) 0 0 / calc(var(--ft) * 6) 100% repeat-x; }
+  .tex-oak { background: url(images/textures/oak-slat.webp) 0 0 / calc(var(--ft) * 4.3) 100% repeat-x; }
+  .tex-black { background: url(images/textures/black-slat.webp) 0 0 / calc(var(--ft) * 6) 100% repeat-x; }
+  .tex-stone { background: linear-gradient(rgba(214, 199, 174, .4), rgba(214, 199, 174, .4)), url(images/textures/travertine.webp) 0 100% / calc(var(--ft) * 6) calc(var(--ft) * 1.6); }
+  .tex-plaster { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .35 0 0 0 0 .35 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(#ebe6de, #e1dbd1); }
+  .tex-clay { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='4' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .4 0 0 0 0 .4 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .35 0 0 0 0 .35 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(#d9ccb9, #cbbca6); }
+  /* Box moldings: raised frames that catch light on top and cast shadow below. */
+  .tex-panels {
+    background:
+      repeating-linear-gradient(90deg, transparent 0 calc(var(--ft) * .35), rgba(0, 0, 0, .12) calc(var(--ft) * .35) calc(var(--ft) * .35 + 1px), rgba(255, 255, 255, .7) calc(var(--ft) * .35 + 1px) calc(var(--ft) * .35 + 3px), transparent calc(var(--ft) * .35 + 3px) calc(var(--ft) * 2.2 - 3px), rgba(255, 255, 255, .7) calc(var(--ft) * 2.2 - 3px) calc(var(--ft) * 2.2 - 1px), rgba(0, 0, 0, .14) calc(var(--ft) * 2.2 - 1px) calc(var(--ft) * 2.2)),
+      repeating-linear-gradient(0deg, transparent 0 calc(var(--ft) * .45), rgba(0, 0, 0, .14) calc(var(--ft) * .45) calc(var(--ft) * .45 + 1px), rgba(255, 255, 255, .7) calc(var(--ft) * .45 + 1px) calc(var(--ft) * .45 + 3px), transparent calc(var(--ft) * .45 + 3px) calc(var(--ft) * 4.5 - 3px), rgba(255, 255, 255, .7) calc(var(--ft) * 4.5 - 3px) calc(var(--ft) * 4.5 - 1px), rgba(0, 0, 0, .12) calc(var(--ft) * 4.5 - 1px) calc(var(--ft) * 4.5)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .35 0 0 0 0 .35 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(#ece7df, #e2dcd2);
+  }
+  .tex-shiplap {
+    background:
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, .2) 0 1px, rgba(0, 0, 0, .06) 1px 3px, rgba(255, 255, 255, .5) 3px 4px, transparent 4px calc(var(--ft) * .5)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .35 0 0 0 0 .35 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(#f2eee8, #e9e4dc);
+  }
+  /* Centre column for media walls and fluted oak: a second material behind the TV, floor to ceiling. */
+  .pv-col { left: calc(var(--col) * var(--ft) / -2); bottom: 0; width: calc(var(--col) * var(--ft)); height: calc(var(--h) * var(--ft)); box-shadow: -3px 0 6px rgba(0, 0, 0, .18), 3px 0 6px rgba(0, 0, 0, .18); }
+  .pv-col::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(255, 244, 228, .15), rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, .1)); }
+
+  .pv-tv {
+    left: calc(var(--tvw) * var(--ft) / -2); bottom: calc((var(--tvy) - var(--tvh) / 2) * var(--ft));
+    width: calc(var(--tvw) * var(--ft)); height: calc(var(--tvh) * var(--ft));
+    display: grid; place-content: center; text-align: center;
+    border: max(2px, calc(var(--ft) * .03)) solid #070707;
+    background: linear-gradient(118deg, #26272a 0, #111214 30%, #060607 60%, #0d0d0f);
+    box-shadow: 0 calc(var(--ft) * .12) calc(var(--ft) * .25) rgba(0, 0, 0, .35);
+    color: rgba(255, 255, 255, .85); font-size: clamp(9px, calc(var(--ft) * .26), 15px); line-height: 1.35;
+  }
+  .pv-tv b { display: block; font-size: 1.7em; font-weight: 400; letter-spacing: -0.02em; }
+  .pv-tv.is-glow { box-shadow: 0 0 calc(var(--ft) * .5) rgba(255, 176, 98, .8), 0 0 calc(var(--ft) * 1.6) rgba(255, 176, 98, .5); }
+  .pv-sb { left: calc(var(--sbw) * var(--ft) / -2); bottom: calc((var(--tvy) - var(--tvh) / 2 - .5) * var(--ft)); width: calc(var(--sbw) * var(--ft)); height: calc(var(--ft) * .2); border-radius: 2px; background: linear-gradient(#2a2a2a, #0e0e0e); box-shadow: 0 calc(var(--ft) * .08) calc(var(--ft) * .15) rgba(0, 0, 0, .35); }
+  .pv-fire {
+    left: calc(var(--fw) * var(--ft) / -2); bottom: calc(var(--ft) * 1.5); width: calc(var(--fw) * var(--ft)); height: calc(var(--ft) * 1.05);
+    border: calc(var(--ft) * .07) solid #0c0c0c; background: radial-gradient(ellipse 60% 90% at 50% 100%, #3a1a08, #070707 70%); overflow: hidden;
+    box-shadow: 0 0 calc(var(--ft) * .6) rgba(255, 140, 50, .35);
+  }
+  .pv-fire::after {
+    content: ''; position: absolute; left: 3%; right: 3%; bottom: 10%; height: 62%;
+    background: repeating-linear-gradient(90deg, #ffc560 0 3px, #ff8a22 3px 5px, #ff5a10 5px 6px, transparent 6px 10px);
+    -webkit-mask-image: linear-gradient(transparent, #000 75%); mask-image: linear-gradient(transparent, #000 75%);
+    filter: blur(1.5px); transform-origin: bottom; animation: flicker 1.3s ease-in-out infinite alternate;
+  }
+  .pv-fire::before { content: ''; position: absolute; left: 3%; right: 3%; bottom: 4%; height: 10%; background: repeating-linear-gradient(90deg, #c9c2b8 0 2px, #6d6760 2px 4px); }
+  @keyframes flicker { to { transform: scaleY(.82) translateX(2px); opacity: .88; } }
+  .pv-console {
+    left: calc(var(--cw) * var(--ft) / -2); bottom: calc(var(--ft) * .8); width: calc(var(--cw) * var(--ft)); height: calc(var(--ft) * .9);
+    background: url(images/textures/walnut-slat.webp) 0 0 / calc(var(--ft) * 6) 100%; filter: saturate(.8) brightness(.8);
+    box-shadow: 0 calc(var(--ft) * .25) calc(var(--ft) * .35) rgba(0, 0, 0, .35);
+  }
+  .pv-console.is-lit { box-shadow: 0 calc(var(--ft) * .3) calc(var(--ft) * .5) rgba(255, 176, 98, .85); }
+  .pv-builtin {
+    left: calc(var(--w) * var(--ft) / -2); bottom: 0; width: calc(var(--w) * var(--ft)); height: calc(var(--ft) * 2.4);
+    background:
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, .25) 0 1px, transparent 1px calc(var(--ft) * 2)),
+      linear-gradient(rgba(255, 255, 255, .25), rgba(0, 0, 0, .1)), linear-gradient(#b48c60, #a07a4f);
+    border-top: calc(var(--ft) * .1) solid #8a673f;
+  }
+  .pv-shelf { height: calc(var(--ft) * .13); background: linear-gradient(#7a5233, #4f321d); box-shadow: 0 calc(var(--ft) * .12) calc(var(--ft) * .14) rgba(0, 0, 0, .3); }
+  .pv-shelf.is-lit { box-shadow: 0 calc(var(--ft) * .15) calc(var(--ft) * .4) rgba(255, 176, 98, .9); }
+  .pv-dim {
+    left: calc(var(--w) * var(--ft) / -2 + 10px); bottom: calc(var(--ft) * -.62); width: calc(var(--w) * var(--ft) - 20px);
+    display: flex; align-items: center; gap: 8px; color: rgba(14, 14, 14, .75); font-size: 11px; white-space: nowrap;
+  }
+  .pv-dim::before, .pv-dim::after { content: ''; flex: 1; height: 1px; background: rgba(14, 14, 14, .45); }
+  .pv-cap { display: flex; justify-content: space-between; gap: 16px; margin: 14px 0 0; color: rgba(255, 255, 255, 0.5); font-size: 13px; }
+  .calc-total { margin-top: clamp(22px, 2.4vw, 32px); }
+  .calc-total p { margin: 0; }
+  .calc-total-label { color: var(--muted); font-size: 13px; }
+  .calc-total-num { margin-top: 6px !important; font-size: clamp(30px, 3vw, 44px); font-weight: 300; letter-spacing: -0.035em; }
+  .calc-total-note { margin-top: 8px !important; color: rgba(255, 255, 255, 0.5); font-size: 13px; line-height: 1.5; }
+
+  /* Packages: sized to fit one screen (header and bottom bar included); a swipeable row on phones. */
+  .pk { display: flex; flex-direction: column; justify-content: center; min-height: 100svh; padding: 88px var(--pad) 100px; }
+  .pk .calc-head { margin-bottom: clamp(20px, 2.6vh, 32px); }
+  .pk-title { font-size: clamp(30px, 3.4vw, 52px); }
+  .pk-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+  /* Package cards: photo, what is included with each item's value, the bundle price against the
+     piece-by-piece price, and a button. The featured one is outlined in white. */
+  .pk-card { position: relative; display: flex; flex-direction: column; background: #141414; }
+  /* The featured package is lit from above, like a wall with its LED on. */
+  .pk-card.is-featured { background: radial-gradient(ellipse 80% 40% at 50% 0, rgba(255, 186, 112, .22), transparent 75%), #181614; }
+  .pk-card.is-picked { box-shadow: 0 0 0 1px var(--white); }
+  .pk-img { height: clamp(120px, 19vh, 200px); overflow: hidden; }
+  .pk-img img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); transform-origin: 50% 30%; }
+  .pk-tag { position: absolute; top: 12px; left: 12px; z-index: 1; padding: 5px 10px; border-radius: 2px; background: var(--white); color: var(--ink); font-size: 10px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
+  .pk-card:not(.is-featured) .pk-tag { background: rgba(14, 14, 14, .75); color: var(--white); backdrop-filter: blur(8px); }
+  .pk-body { display: flex; flex: 1; flex-direction: column; padding: clamp(16px, 1.6vw, 24px); }
+  .pk-name { margin: 0; font-size: clamp(22px, 1.8vw, 28px); font-weight: 400; letter-spacing: -0.03em; }
+  .pk-sub { margin: 4px 0 14px; color: var(--muted); font-size: 14px; font-weight: 300; }
+  .pk-list { flex: 1; margin: 0; padding: 0; list-style: none; font-size: 13px; font-weight: 300; line-height: 1.35; }
+  .pk-list li { display: flex; align-items: baseline; gap: 10px; padding: 5px 0; }
+  .pk-list li::before { content: ''; flex: none; width: 9px; height: 5px; margin-bottom: 3px; border-left: 1.5px solid var(--white); border-bottom: 1.5px solid var(--white); transform: rotate(-45deg); }
+  .pk-list li span { color: rgba(255, 255, 255, 0.45); margin-left: auto; white-space: nowrap; }
+  .pk-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin: 16px 0 14px;  }
+  .pk-price s { color: rgba(255, 255, 255, 0.4); font-size: 15px; }
+  .pk-price strong { font-size: clamp(26px, 2.2vw, 34px); font-weight: 400; letter-spacing: -0.035em; }
+  .pk-save { padding: 3px 8px; border: 1px solid rgba(255, 255, 255, .3); border-radius: 2px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+  .pk-btn { justify-content: center; width: 100%; padding-block: 14px; border: 0; font-family: inherit; cursor: pointer; }
+  .pk-card:not(.is-featured) .pk-btn { background: none; color: var(--white); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .45); }
+  .pk-card:not(.is-featured) .pk-btn:hover { box-shadow: inset 0 0 0 1px var(--white); }
+  .pk-card.is-featured .pk-btn:hover { box-shadow: inset 0 0 0 1px var(--white); }
+  .dock-btn:hover { box-shadow: inset 0 0 0 1px var(--white); }
+
+  @media (max-width: 960px) {
+    .calc-body { grid-template-columns: 1fr; }
+    /* Phones and tablets: the preview stays pinned under the header while the options scroll past. */
+    .calc-side { position: sticky; top: 64px; z-index: 5; order: -1; margin: 0 calc(var(--pad) * -1); padding: 8px var(--pad) 10px; background: var(--ink); box-shadow: 0 14px 18px -8px var(--ink); }
+    .pv-cap { margin-top: 6px; font-size: 11px; }
+    /* The bottom bar already shows the estimate on small screens. */
+    .calc-total { display: none; }
+    .pk-grid { grid-template-columns: 1fr; }
+    .pk { min-height: 0; padding-top: 72px; }
+    .pk-img { height: 120px; }
+  }
+  @media (max-width: 600px) {
+    .dock { gap: 10px; padding: 10px 14px; }
+    .dock-est { gap: 12px; }
+    .dock-btn { padding: 14px 16px; font-size: 14px; }
+    .wa { width: 48px; height: 48px; }
+    .pv-cap span:last-child { display: none; }
+  }
+
+  /* Narrower screens: headline and details stack at the bottom left. */
+  @media (max-width: 1000px) {
+    .copy { padding-bottom: calc(var(--pad) + 60px) !important; } /* room for the WhatsApp button */
+    .copy { display: flex; flex-direction: column; justify-content: flex-end; gap: 18px; padding: var(--pad); }
+    .lead, .content { position: static; max-width: none; }
+    .t1, .t2 { white-space: normal; }
+  }
+  @media (max-width: 700px) {
+    /* On phones the row wraps into two centred lines. */
+    .tabs { top: 96px; width: calc(100% - 2 * var(--pad)); flex-wrap: wrap; justify-content: center; gap: 2px 16px; white-space: normal; }
+    .tab { font-size: 13px; padding: 4px 0; gap: 8px; }
+    .tab svg { width: 15px; height: 15px; }
+    .perks { gap: 18px; }
+    .perks b { font-size: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :root { --dip-in: .01s; --dip-out: .01s; }
+    .t1, .t2, .subtitle, .perks, .actions, .tabs { animation: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+  }
+  /* Tabs as icons only; the name shows as a tooltip and is read out by screen readers. */
+  .tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tab { padding: 8px; }
+  .tab svg { width: 24px; height: 24px; transition: filter .6s ease; }
+  .tab[aria-selected='true'] svg { filter: drop-shadow(0 0 4px rgba(255, 214, 165, .9)) drop-shadow(0 0 12px rgba(255, 170, 90, .6)); }
+  @media (max-width: 700px) { .tabs { width: auto; flex-wrap: nowrap; gap: 6px; } .tab svg { width: 22px; height: 22px; } }
+  .header { transition: padding .5s var(--ease-out), background .5s var(--ease-out), transform .45s var(--ease-out); }
+  @media (max-width: 960px) {
+    body.in-calc .header { transform: translateY(-100%); }
+    .calc-side { transition: top .45s var(--ease-out); }
+    body.in-calc .calc-side { top: 0; }
+  }
+</style>
+</head>
+<body>
+  <header class="header" data-header>
+    <a href="#top" class="logo">DecorWall LA</a>
+    <nav class="nav" aria-label="Main">
+      <a href="#media-walls">Media Walls</a>
+      <a href="#slat-walls">Slat Walls</a>
+      <a href="#stone">Stone</a>
+      <a href="#fireplace">Fireplace</a>
+      <a href="#styles">Styles</a>
+      <a href="#cost">Cost</a>
+      <a href="#areas">Areas</a>
+    </nav>
+    <a href="#estimate" class="cta btn-primary">Get estimate</a>
+    <button type="button" class="burger" data-burger aria-label="Menu" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
+  </header>
+  <div class="menu" id="menu" data-menu hidden>
+    <a href="#media-walls" data-menu-link>Media Walls</a>
+    <a href="#slat-walls" data-menu-link>Slat Walls</a>
+    <a href="#stone" data-menu-link>Stone</a>
+    <a href="#fireplace" data-menu-link>Fireplace</a>
+    <a href="#styles" data-menu-link>Styles</a>
+    <a href="#cost" data-menu-link>Cost</a>
+    <a href="#areas" data-menu-link>Areas</a>
+    <a href="#estimate" data-menu-link>Estimate</a>
+  </div>
+
+  <main>
+    <div class="track" id="top" data-track>
+      <section class="hero">
+        <div class="media" aria-hidden="true">
+          <div class="slide is-active" data-slide><img src="images/hero-1.webp" alt="" width="2000" height="1497" fetchpriority="high"></div>
+          <div class="slide" data-slide><img src="images/hero-2.webp" alt="" width="2000" height="1497"></div>
+          <div class="slide" data-slide><img src="images/hero-3.webp" alt="" width="2000" height="1497"></div>
+          <div class="slide" data-slide><img src="images/hero-4.webp" alt="" width="2000" height="1497"></div>
+          <div class="slide" data-slide><img src="images/hero-5.webp" alt="" width="2000" height="1497"></div>
+          <div class="veil" data-veil></div>
+        </div>
+        <div class="scrim" aria-hidden="true"></div>
+
+        <div class="copy">
+          <div class="lead">
+            <h1 class="title"><span class="t1">Media Walls</span> <span class="t2">Designed to <span class="accent">Inspire</span></span></h1>
+          </div>
+          <div class="content">
+            <!-- Figures from DecorWall's own terms (free preview, reply within an hour, 3-day simple installs). Add ratings once there are real ones. -->
+            <ul class="perks">
+              <li><b>$0</b><span>design preview</span></li>
+              <li><b>1 hour</b><span>to reply</span></li>
+              <li><b>3 days</b><span>simple install</span></li>
+            </ul>
+            <div class="actions">
+              <a href="#cost" class="btn-primary">Get a free estimate</a>
+              <a href="/styles/" class="btn-link">Explore styles<svg class="mark" viewBox="0 0 18 16" fill="currentColor" aria-hidden="true"><path d="M1 1.5l3 .9v11.2l-3 .9zM5.6 2.9l2 .6v9l-2 .6zM9.2 4l1.8.5v7l-1.8.5zM12.6 5l1.6.5v5l-1.6.5zM15.8 6l1.4.4v3.2l-1.4.4z"/></svg></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Wall styles">
+          <button type="button" role="tab" class="tab" aria-selected="true" data-tab aria-label="Before" title="Before"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="11" rx=".5"/></svg><span class="tab-label">Before</span></button>
+          <button type="button" role="tab" class="tab" aria-selected="false" tabindex="-1" data-tab aria-label="Oak & Stone" title="Oak & Stone"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="11" rx=".5"/><path d="M2.5 9h13M7 3.5V9M11 9v5.5"/></svg><span class="tab-label">Oak &amp; Stone</span></button>
+          <button type="button" role="tab" class="tab" aria-selected="false" tabindex="-1" data-tab aria-label="Walnut Shelves" title="Walnut Shelves"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5h12M3 9h12M3 13.5h12"/></svg><span class="tab-label">Walnut Shelves</span></button>
+          <button type="button" role="tab" class="tab" aria-selected="false" tabindex="-1" data-tab aria-label="Black Slat" title="Black Slat"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3.5h2.2v11H3zM6.6 3.5h2.2v11H6.6zM10.2 3.5h2.2v11h-2.2zM13.8 3.5H15v11h-1.2z" fill="currentColor" stroke="none"/></svg><span class="tab-label">Black Slat</span></button>
+          <button type="button" role="tab" class="tab" aria-selected="false" tabindex="-1" data-tab aria-label="Walnut Slat" title="Walnut Slat"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 3.5v11M6.25 3.5v11M9 3.5v11M11.75 3.5v11M14.5 3.5v11"/></svg><span class="tab-label">Walnut Slat</span></button>
+        </div>
+      </section>
+    </div>
+
+    <section class="why" id="media-walls" aria-labelledby="why-title">
+      <div class="why-text">
+        <h2 class="why-title reveal" id="why-title">Why homeowners pick a <strong>built wall</strong> over a bigger TV stand</h2>
+        <p class="why-lead reveal">Designed to the inch: the screen at the right height, equipment hidden, cables gone, storage where you need it. It reads as furniture, not a TV in front of drywall.</p>
+        <a class="why-more reveal" href="#cost">Design yours<svg class="mark" viewBox="0 0 18 16" fill="currentColor" aria-hidden="true"><path d="M1 1.5l3 .9v11.2l-3 .9zM5.6 2.9l2 .6v9l-2 .6zM9.2 4l1.8.5v7l-1.8.5zM12.6 5l1.6.5v5l-1.6.5zM15.8 6l1.4.4v3.2l-1.4.4z"/></svg></a>
+      </div>
+      <figure class="why-photo reveal">
+        <img src="images/hero-3.webp" alt="Walnut slat media wall with lit floating shelves on both sides" width="2000" height="1497" loading="lazy">
+      </figure>
+    </section>
+
+    <section class="calc" id="cost" aria-labelledby="calc-title">
+      <div class="calc-head">
+        <h2 class="calc-title reveal" id="calc-title">Build your <strong>wall.</strong></h2>
+        <p class="calc-intro reveal">Pick a project and the details. The preview is drawn to scale and the estimate updates as you go. Final price is confirmed after a free design preview.</p>
+      </div>
+      <div class="calc-body" id="builder">
+        <form class="calc-form" data-calc></form>
+        <div class="calc-side">
+          <div class="pv" data-pv aria-hidden="true">
+            <div class="pv-stage" data-stage>
+              <div class="pv-floor"></div>
+              <div class="pv-room" data-room></div>
+            </div>
+          </div>
+          <p class="pv-cap"><span data-pv-cap>Shown to scale</span><span data-pv-ceil>Ceiling 9 ft</span></p>
+          <div class="calc-total" aria-live="polite">
+            <p class="calc-total-label">Your estimate</p>
+            <p class="calc-total-num" data-total>from $0</p>
+            <p class="calc-total-note" data-total-note></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pk" id="packages" aria-labelledby="pk-title">
+      <div class="calc-head">
+        <h2 class="pk-title reveal" id="pk-title">Save with a <strong>package.</strong></h2>
+        <p class="pk-intro reveal">Our most-built walls as done-for-you bundles, priced lower than booking piece by piece. Choose one to load it into the builder above and adjust anything.</p>
+      </div>
+      <div class="pk-grid" data-packages></div>
+    </section>
+  </main>
+
+  <div class="dock" data-dock>
+    <div class="dock-est">
+      <p class="dock-sum"><small data-dock-label>Your estimate</small><strong data-dock-total>from $0</strong></p>
+      <a class="btn-primary dock-btn" data-quote href="#" target="_blank" rel="noopener">Get my quote</a>
+    </div>
+    <a class="wa" data-wa href="#" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.2a9.7 9.7 0 0 0-8.3 14.8L2.4 21.7l4.8-1.3A9.7 9.7 0 1 0 12 2.2Zm0 17.7a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.8.8-2.8-.2-.3A8 8 0 1 1 12 19.9Zm4.4-6c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8.9c-.1.2-.3.2-.5.1a6.6 6.6 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 5 5 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1l-.5-.2Z"/></svg>
+    </a>
+  </div>
+
+<script>
+  // How much scrolling each wall gets, as a share of the viewport height.
+  const STEP = 1;
+
+  const track = document.querySelector('[data-track]');
+  const header = document.querySelector('[data-header]');
+  const slides = [...document.querySelectorAll('[data-slide]')];
+  const tabs = [...document.querySelectorAll('[data-tab]')];
+  const n = slides.length;
+  let current = 0;
+
+  function sizeTrack() {
+    track.style.height = `${window.innerHeight * (1 + STEP * (n - 1))}px`;
+  }
+
+  // 0 at the top of the hero, n - 1 at the end of its pinned stretch.
+  function position() {
+    const range = track.offsetHeight - window.innerHeight;
+    if (range <= 0) return 0;
+    const t = Math.min(Math.max(-track.getBoundingClientRect().top / range, 0), 1);
+    return t * (n - 1);
+  }
+
+  const veil = document.querySelector('[data-veil]');
+  const DIP_MS = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+  let shown = 0;
+  let dipTimer = 0;
+
+  // Dips to black, swaps to the wall that is current by then, and lifts the veil.
+  function show(i) {
+    if (i === current) return;
+    current = i;
+    tabs.forEach((t, k) => {
+      t.setAttribute('aria-selected', String(k === i));
+      t.tabIndex = k === i ? 0 : -1;
+    });
+    if (dipTimer) return;
+    veil.classList.add('is-on');
+    dipTimer = window.setTimeout(() => {
+      slides[shown].classList.remove('is-active');
+      slides[current].classList.add('is-active');
+      shown = current;
+      dipTimer = 0;
+      veil.classList.remove('is-on');
+    }, DIP_MS);
+  }
+
+  let ticking = false;
+  function update() {
+    ticking = false;
+    const pos = position();
+    show(Math.min(Math.round(pos), n - 1));
+    // The header gets its backdrop only once the page moves past the walls, not while they change.
+    header.classList.toggle('is-scrolled', window.scrollY > track.offsetTop + track.offsetHeight - window.innerHeight + 40);
+  }
+  function onScroll() {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }
+
+  function scrollToSlide(i) {
+    const range = track.offsetHeight - window.innerHeight;
+    const top = track.getBoundingClientRect().top + window.scrollY + (range * i) / (n - 1);
+    smoothTo(top);
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => scrollToSlide(i));
+    tab.addEventListener('keydown', (e) => {
+      const dir = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault();
+      const next = Math.min(Math.max(i + dir, 0), n - 1);
+      scrollToSlide(next);
+      tabs[next].focus();
+    });
+  });
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', () => { sizeTrack(); update(); });
+  sizeTrack();
+  update();
+
+  // Sections below the hero fade up as they come into view.
+  const revealer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-in');
+      revealer.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -12% 0px' });
+  document.querySelectorAll('.reveal').forEach((el) => revealer.observe(el));
+
+  // Smooth scrolling: the page eases towards where the wheel sends it, so it moves with a little weight.
+  // Lower SMOOTH means slower, heavier scrolling. Touch scrolling is left native.
+  const SMOOTH = 0.07;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let scrollPos = window.scrollY;
+  let scrollTarget = scrollPos;
+  let gliding = false;
+  let lastFrame = 0;
+
+  function maxScroll() {
+    return document.documentElement.scrollHeight - window.innerHeight;
+  }
+
+  function glide(now) {
+    const dt = lastFrame ? Math.min((now - lastFrame) / 16.67, 4) : 1;
+    lastFrame = now;
+    scrollPos += (scrollTarget - scrollPos) * (1 - Math.pow(1 - SMOOTH, dt));
+    if (Math.abs(scrollTarget - scrollPos) < 0.5) {
+      scrollPos = scrollTarget;
+      gliding = false;
+    }
+    window.scrollTo(0, scrollPos);
+    if (gliding) requestAnimationFrame(glide);
+  }
+
+  function smoothTo(y) {
+    scrollTarget = Math.min(Math.max(y, 0), maxScroll());
+    if (reduceMotion) {
+      window.scrollTo(0, scrollTarget);
+      return;
+    }
+    if (!gliding) {
+      gliding = true;
+      scrollPos = window.scrollY;
+      lastFrame = 0;
+      requestAnimationFrame(glide);
+    }
+  }
+
+  // Walls brake and snap: scrolling slows near each wall, so moving on takes a deliberate push,
+  // and when scrolling stops inside the hero the page settles onto the nearest wall.
+  // The section after the hero is one more stop, so leaving the last wall (and coming back up
+  // to it) takes the same deliberate push as moving between walls.
+  const BRAKE = 0.35;     // scroll speed right at a wall (1 = normal)
+  const BRAKE_ZONE = 0.3; // how far around each wall the brake works, as a share of one wall's scroll
+  const MOVE_ON = 0.2;    // how far past a wall, as a share of one wall's scroll, settles on the next one
+  const SNAP_AFTER = 180; // ms of no scrolling before settling onto a wall
+  let snapTimer = 0;
+  let scrollDir = 1;
+
+  const afterHero = document.querySelector('.why');
+
+  function segment() {
+    return (track.offsetHeight - window.innerHeight) / (n - 1);
+  }
+
+  // Scroll positions to settle on: each wall, then the top of the section after the hero.
+  function stops() {
+    const list = slides.map((_, i) => track.offsetTop + i * segment());
+    list.push(afterHero.offsetTop);
+    return list;
+  }
+
+  // Progress through the stops for a scroll position: 0 on the first wall, 1 on the second and so on; null outside.
+  function heroPos(y) {
+    const s = stops();
+    for (let k = 0; k < s.length - 1; k++) {
+      if (y >= s[k] && y <= s[k + 1]) return k + (y - s[k]) / (s[k + 1] - s[k] || 1);
+    }
+    return null;
+  }
+
+  // Below the hero every section edge is a soft stop too: scrolling slows as a section arrives,
+  // and if scrolling ends close to an edge the page settles onto it. Inside a tall section you
+  // can still stop anywhere.
+  const SECTION_ZONE = 0.55; // brake zone around a section edge, as a share of the screen height
+  const SECTION_SNAP = 0.4;  // settle onto an edge ahead when scrolling stops this close to it
+  function sectionTops() {
+    return [...document.querySelectorAll('main > section, footer')].map((el) => el.offsetTop).filter((t) => t > afterHero.offsetTop + 10);
+  }
+  function nearestTop(y) {
+    let best = null;
+    sectionTops().forEach((t) => { if (best === null || Math.abs(t - y) < Math.abs(best - y)) best = t; });
+    return best;
+  }
+  function sectionBrake(y) {
+    const t = nearestTop(y);
+    if (t === null) return 1;
+    const d = Math.abs(y - t) / (window.innerHeight * SECTION_ZONE);
+    if (d >= 1) return 1;
+    return 0.22 + (1 - 0.22) * d * d * (3 - 2 * d);
+  }
+
+  function brake(y) {
+    const p = heroPos(y);
+    if (p === null) return sectionBrake(y);
+    const d = Math.abs(p - Math.round(p)) / BRAKE_ZONE; // 0 at a wall, 1 at the zone edge
+    if (d >= 1) return 1;
+    const ease = d * d * (3 - 2 * d);
+    return BRAKE + (1 - BRAKE) * ease;
+  }
+
+  function snap() {
+    const p = heroPos(scrollTarget);
+    if (p === null) {
+      const t = nearestTop(scrollTarget);
+      // Only pull towards an edge that is ahead in the direction of travel, never back to one just left.
+      const ahead = scrollDir > 0 ? t > scrollTarget : t < scrollTarget;
+      if (t !== null && ahead && Math.abs(t - scrollTarget) > 1 && Math.abs(t - scrollTarget) < window.innerHeight * SECTION_SNAP) smoothTo(t);
+      return;
+    }
+    const lo = Math.floor(p);
+    const hi = Math.ceil(p);
+    // Settle in the direction of travel once the push went far enough; otherwise fall back.
+    const wall = scrollDir > 0 ? (p - lo > MOVE_ON ? hi : lo) : (hi - p > MOVE_ON ? lo : hi);
+    if (Math.abs(p - wall) > 0.001) smoothTo(stops()[wall]);
+  }
+
+  function scheduleSnap() {
+    window.clearTimeout(snapTimer);
+    snapTimer = window.setTimeout(snap, SNAP_AFTER);
+  }
+
+  window.addEventListener('wheel', (e) => {
+    if (e.ctrlKey || document.body.classList.contains('menu-open')) return;
+    e.preventDefault();
+    const unit = e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? window.innerHeight : 1;
+    const from = gliding ? scrollTarget : window.scrollY;
+    if (e.deltaY) scrollDir = Math.sign(e.deltaY);
+    smoothTo(from + e.deltaY * unit * brake(from));
+    scheduleSnap();
+  }, { passive: false });
+
+  // Keep in step when the page is scrolled some other way (touch, keyboard, scrollbar, anchor links),
+  // and settle onto a wall once that scrolling stops too.
+  // On touch screens the page is never pulled or snapped: the phone's own scrolling, with its
+  // momentum, is left alone, so nothing jerks under the finger.
+  const touchScreen = window.matchMedia('(pointer: coarse)').matches;
+  let touching = false;
+  window.addEventListener('touchstart', () => { touching = true; window.clearTimeout(snapTimer); }, { passive: true });
+  window.addEventListener('touchend', () => { touching = false; }, { passive: true });
+  window.addEventListener('scroll', () => {
+    if (gliding) return;
+    if (window.scrollY !== scrollTarget) scrollDir = Math.sign(window.scrollY - scrollTarget);
+    scrollPos = scrollTarget = window.scrollY;
+    if (!touchScreen && !touching) scheduleSnap();
+  }, { passive: true });
+
+</script>
+<script>
+  // ---------------------------------------------------------------------------------------------
+  // Wall builder. All prices live here.
+  // Project and style starting prices are DecorWall's published "from" prices.
+  // PLACEHOLDER: the size, add-on and package-discount figures below are estimates to be replaced
+  // with real numbers.
+  // ---------------------------------------------------------------------------------------------
+  const WHATSAPP_NUMBER = document.body.dataset.whatsapp || ''; // set once in site/build.py
+
+  const PROJECTS = [
+    { id: 'media',  name: 'TV Media Wall',                  from: 7500, finish: 'media' },
+    { id: 'slat',   name: 'Walnut Slat Wall',               from: 2500, finish: 'slat' },
+    { id: 'stone',  name: 'Stone & Marble Wall',            from: 9800, finish: 'stone' },
+    { id: 'fire',   name: 'Electric Fireplace Wall',        from: 5900, finish: 'fire' },
+    { id: 'accent', name: 'Accent Wall & Decorative Panels', from: 2500, finish: 'panels' },
+  ];
+  // from: null means the style is priced by design.
+  const STYLES = [
+    { id: 'none',     name: 'No style yet',            from: 0 },
+    { id: 'builtin',  name: 'Full Built-In',           from: 7500 },
+    { id: 'clay-oak', name: 'Roman Clay & Fluted Oak', from: 8100 },
+    { id: 'shiplap',  name: 'Shiplap & Panels',        from: 2500 },
+    { id: 'cabinet',  name: 'Floating Cabinet',        from: null },
+    { id: 'clay',     name: 'Roman Clay Minimalist',   from: null },
+    { id: 'minimal',  name: 'Minimalist TV Wall',      from: null },
+  ];
+  // Wall width changes the preview only; the "from" price is always the published starting price.
+  const WIDTHS = [
+    { id: '8',  ft: 8,  name: '8 ft',  add: 0 },
+    { id: '10', ft: 10, name: '10 ft', add: 0 },
+    { id: '12', ft: 12, name: '12 ft', add: 0 },
+    { id: '16', ft: 16, name: '16 ft', add: 0 },
+    { id: '20', ft: 20, name: '20 ft', add: 0 },
+  ];
+  // Screen sizes, for the preview only. Width and height in inches.
+  const TVS = [
+    { id: 'none', name: 'No TV' },
+    { id: '65',  name: '65″',  w: 56.7, h: 31.9 },
+    { id: '75',  name: '75″',  w: 65.4, h: 36.8 },
+    { id: '85',  name: '85″',  w: 74.1, h: 41.7 },
+    { id: '100', name: '100″', w: 87.2, h: 49.0 },
+  ];
+  // PLACEHOLDER prices for the extras.
+  const HEIGHTS = [
+    { id: '8', ft: 8, name: '8 ft', price: 0 },
+    { id: '9', ft: 9, name: '9 ft', price: 0 },
+    { id: '10', ft: 10, name: '10 ft', price: 0 },
+    { id: '11', ft: 11, name: '11 ft', price: 250 },
+    { id: '12', ft: 12, name: '12 ft', price: 400 },
+  ];
+  // Slat finishes. tex is the photo texture used in the preview, fx tunes its colour.
+  const FINISHES = [
+    { id: 'walnut',    name: 'Walnut',       tex: 'walnut', fx: 'none' },
+    { id: 'oak',       name: 'Oak',          tex: 'oak',    fx: 'none' },
+    { id: 'white-oak', name: 'White Oak',    tex: 'oak',    fx: 'brightness(1.28) saturate(.55)' },
+    { id: 'teak',      name: 'Teak',         tex: 'oak',    fx: 'saturate(1.25) brightness(.86) sepia(.15)' },
+    { id: 'black',     name: 'Black',        tex: 'black',  fx: 'none' },
+    { id: 'gray',      name: 'Coastal Gray', tex: 'oak',    fx: 'grayscale(.85) brightness(1.02)' },
+  ];
+  const BASEBOARD = [
+    { id: 'keep',   name: 'Keep baseboard',             price: 0 },
+    { id: 'remove', name: 'Remove, slats to the floor', price: 0 },
+  ];
+  const MOUNTS = [
+    { id: 'tilt',   name: 'Tilting mount',     price: 0 },
+    { id: 'motion', name: 'Full-motion mount', price: 100 },
+  ];
+  const WALL = [
+    { id: 'masonry', name: 'Brick, stone or stucco wall', price: 150 },
+  ];
+  const POWER = [
+    { id: 'hidden', name: 'Cables hidden in-wall',    price: 0 },
+    { id: 'outlet', name: 'New outlet behind the TV', price: 150 },
+    { id: 'as-is',  name: 'Leave cables as they are', price: 0 },
+  ];
+  const LIGHT = [
+    { id: 'backlight', name: 'LED glow behind the TV',     price: 100 },
+    { id: 'strips',    name: 'LED in shelves and console', price: 200 },
+    { id: 'slatled',   name: 'LED lines inside the slats',  price: 400 },
+  ];
+  const ADDONS = [
+    { id: 'shelves',   name: 'Floating shelves',          price: 350 },
+    { id: 'console',   name: 'Floating console',          price: 600 },
+    { id: 'fireplace', name: 'Linear electric fireplace', price: 1500 },
+    { id: 'mantel',    name: 'Floating mantel',           price: 300 },
+    { id: 'soundbar',  name: 'Soundbar mounted',          price: 60 },
+    { id: 'removal',   name: 'Take down old TV or unit',  price: 40 },
+  ];
+
+  const DEFAULT_PICK = { project: 'slat', style: 'none', width: '12', height: '9', finish: 'walnut', baseboard: 'keep', tv: '75', mount: 'tilt', wall: [], power: 'hidden', light: [], addons: [] };
+
+  const PACKAGES = [
+    { id: 'essential', name: 'Slat Accent', sub: 'Warm wood behind the TV, done right.', img: 'images/hero-5.webp', pos: '50% 22%',
+      pick: { project: 'slat', style: 'none', width: '12', tv: '65', wall: [], power: 'hidden', light: ['backlight'], addons: ['soundbar', 'removal'] } },
+    { id: 'signature', name: 'Media Wall', sub: 'No wires, warm glow, the full wall.', img: 'images/hero-3.webp', pos: '50% 22%', tag: 'Most popular',
+      pick: { project: 'media', style: 'none', width: '12', tv: '75', wall: [], power: 'outlet', light: ['backlight', 'strips'], addons: ['shelves', 'soundbar'] } },
+    { id: 'stone', name: 'Stone Statement', sub: 'Natural stone with oak, lit at night.', img: 'images/hero-2.webp', pos: '50% 22%', tag: 'Best value',
+      pick: { project: 'stone', style: 'none', width: '12', tv: '85', wall: [], power: 'outlet', light: ['backlight', 'strips'], addons: ['shelves'] } },
+  ];
+
+  const money = (n) => '$' + Math.round(n).toLocaleString('en-US');
+  const byId = (list, id) => list.find((x) => x.id === id);
+  const roundTo = (n, step) => Math.round(n / step) * step;
+
+  // ----- Pricing -----
+  function quote(pick) {
+    const project = byId(PROJECTS, pick.project);
+    const style = byId(STYLES, pick.style);
+    const width = byId(WIDTHS, pick.width);
+    const byDesign = style.from === null;
+    const base = Math.max(project.from, style.from || 0);
+    const lines = [[`${project.name}${style.id !== 'none' ? `, ${style.name} style` : ''}`, base]];
+    if (width.add) lines.push([`${width.name} wide`, base * width.add]);
+    const sized = base * (1 + width.add);
+    const height = byId(HEIGHTS, pick.height);
+    if (height.price) lines.push([`${height.name} tall wall`, height.price]);
+    if (pick.tv !== 'none') { const m = byId(MOUNTS, pick.mount); if (m.price) lines.push([m.name, m.price]); }
+    pick.wall.forEach((id) => { const o = byId(WALL, id); lines.push([o.name, o.price]); });
+    const power = byId(POWER, pick.power);
+    if (power.price) lines.push([power.name, power.price]);
+    pick.light.forEach((id) => {
+      if (id === 'slatled' && !hasSlats(pick)) return;
+      const o = byId(LIGHT, id); lines.push([o.name, o.price]);
+    });
+    pick.addons.forEach((id) => {
+      if (id === 'fireplace' && pick.project === 'fire') return;
+      if (id === 'mantel' && !(pick.project === 'fire' || pick.addons.includes('fireplace'))) return;
+      const o = byId(ADDONS, id); lines.push([o.name, o.price]);
+    });
+    const total = lines.reduce((sum, l) => sum + l[1], 0);
+    // base: the project's starting price for this wall. A package costs exactly this; its extras come included.
+    return { lines, total: roundTo(total, 10), base: roundTo(sized, 10), byDesign, extras: roundTo(total - sized, 10) };
+  }
+
+  // ----- Form -----
+  const form = document.querySelector('[data-calc]');
+  const GROUPS = [
+    { key: 'project', type: 'radio', label: 'Project', note: 'starting price', items: PROJECTS, price: (o) => 'from ' + money(o.from) },
+    { key: 'style', type: 'radio', label: 'Style', note: 'optional', items: STYLES, price: (o) => o.id === 'none' ? '' : o.from === null ? 'by design' : 'from ' + money(o.from) },
+    { key: 'width', type: 'radio', label: 'Wall width', note: 'shown to scale', items: WIDTHS, price: () => '' },
+    { key: 'height', type: 'radio', label: 'Wall height', note: 'floor to ceiling', items: HEIGHTS, price: (o) => o.price ? '+' + money(o.price) : '' },
+    { key: 'finish', type: 'radio', label: 'Slat finish', items: FINISHES, price: () => '', swatch: true },
+    { key: 'baseboard', type: 'radio', label: 'Baseboard', items: BASEBOARD, price: () => '',
+      hint: 'Running the slats to the floor depends on the wall; we confirm it on site.' },
+    { key: 'tv', type: 'radio', label: 'TV size', note: 'shown to scale', items: TVS, price: () => '' },
+    { key: 'mount', type: 'radio', label: 'TV mount', items: MOUNTS, price: (o) => o.price ? '+' + money(o.price) : 'included',
+      hint: 'Tilting sits close to the wall and tilts down. Full-motion swivels and pulls out.' },
+    { key: 'wall', type: 'checkbox', label: 'Wall & access', note: 'harder installs', items: WALL, price: (o) => '+' + money(o.price) },
+    { key: 'power', type: 'radio', label: 'Cords & power', items: POWER, price: (o) => o.price ? money(o.price) : 'included' },
+    { key: 'light', type: 'checkbox', label: 'Lighting', items: LIGHT, price: (o) => money(o.price) },
+    { key: 'addons', type: 'checkbox', label: 'Add-ons', items: ADDONS, price: (o) => money(o.price),
+      hint: 'Everything is drawn to scale in the preview and installed by our LA crew.' },
+  ];
+  form.innerHTML = GROUPS.map((g) => `
+    <fieldset class="opt" data-group="${g.key}">
+      <legend>${g.label}${g.note ? ` <small>${g.note}</small>` : ''}</legend>
+      <div class="chips">${g.items.map((o) => `
+        <label class="chip"><input type="${g.type}" name="${g.key}" value="${o.id}"><span>${g.swatch ? `<i class="sw" style="background-image:url(images/textures/${o.tex}-slat.webp);filter:${o.fx}"></i>` : ''}${o.name}${g.price(o) ? ` <b>${g.price(o)}</b>` : ''}</span></label>`).join('')}
+      </div>${g.hint ? `
+      <p class="opt-hint">${g.hint}</p>` : ''}
+    </fieldset>`).join('');
+
+  function readPick() {
+    const val = (k) => form.querySelector(`[name="${k}"]:checked`)?.value;
+    const all = (k) => [...form.querySelectorAll(`[name="${k}"]:checked`)].map((i) => i.value);
+    return { project: val('project'), style: val('style'), width: val('width'), height: val('height'), finish: val('finish'), baseboard: val('baseboard'),
+      tv: val('tv'), mount: val('mount'), wall: all('wall'), power: val('power'), light: all('light'), addons: all('addons') };
+  }
+  function setPick(pick) {
+    const p = { ...DEFAULT_PICK, finish: defaultFinish(pick.style || 'none', pick.project || DEFAULT_PICK.project), ...pick };
+    form.querySelectorAll('input').forEach((i) => {
+      const v = p[i.name];
+      i.checked = Array.isArray(v) ? v.includes(i.value) : v === i.value;
+    });
+  }
+
+  // ----- Preview -----
+  const pv = document.querySelector('[data-pv]');
+  const stage = document.querySelector('[data-stage]');
+  const room = document.querySelector('[data-room]');
+  const pvCap = document.querySelector('[data-pv-cap]');
+  const pvCeil = document.querySelector('[data-pv-ceil]');
+  const FLOOR = 0.6; // ft of floor shown under the wall
+
+  // Wall material for each project, and for each style when one is picked.
+  // col is a second material in a floor-to-ceiling column behind the TV.
+  const LOOKS = {
+    media: { wall: 'oak', col: 'stone' },
+    slat: { wall: 'walnut' },
+    stone: { wall: 'stone' },
+    fire: { wall: 'plaster' },
+    accent: { wall: 'panels' },
+    builtin: { wall: 'plaster', builtin: true },
+    'clay-oak': { wall: 'clay', col: 'oak' },
+    shiplap: { wall: 'shiplap' },
+    cabinet: { wall: 'black', console: true },
+    clay: { wall: 'clay' },
+    minimal: { wall: 'plaster' },
+  };
+
+  const SLAT_TEX = ['walnut', 'oak', 'black'];
+  const lookOf = (p) => LOOKS[p.style !== 'none' ? p.style : p.project];
+  function hasSlats(p) { const l = lookOf(p); return SLAT_TEX.includes(l.wall) || l.col === 'oak'; }
+  // The finish a project shows with until the visitor picks another.
+  function defaultFinish(style, project) {
+    const l = LOOKS[style !== 'none' ? style : project];
+    return SLAT_TEX.includes(l.wall) ? l.wall : l.col === 'oak' ? 'oak' : 'walnut';
+  }
+
+  // The wall always fills the preview edge to edge at the chosen width. On narrow walls the
+  // preview would get very tall, so it is capped and the top of the wall is cropped instead.
+  // top: how high (ft) the content reaches; if even that does not fit, the floor slides out of view too.
+  function scalePreview(w, h, top) {
+    // On narrow screens the preview is pinned at the top, so it takes at most about a third of the screen.
+    const maxH = window.innerWidth <= 960 ? window.innerHeight * 0.3 : Math.min(window.innerHeight * 0.6, 540);
+    const ft = pv.clientWidth / w;
+    const height = Math.min((h + FLOOR) * ft, maxH);
+    const shift = Math.max(0, (top + FLOOR) * ft - height);
+    stage.style.width = '100%';
+    stage.style.height = height.toFixed(1) + 'px';
+    stage.style.setProperty('--ft', ft.toFixed(3) + 'px');
+    stage.style.setProperty('--shift', shift.toFixed(1) + 'px');
+  }
+
+  function drawPreview(p) {
+    const width = byId(WIDTHS, p.width);
+    const tv = byId(TVS, p.tv);
+    const look = lookOf(p);
+    const w = width.ft;
+    const h = byId(HEIGHTS, p.height).ft;
+    const fin = byId(FINISHES, p.finish) || FINISHES[0];
+    // Slat surfaces take the chosen finish; other materials draw as they are.
+    const surface = (tex) => SLAT_TEX.includes(tex) ? `tex-${fin.tex}" style="filter:${fin.fx}` : `tex-${tex}`;
+    const hasFire = p.project === 'fire' || p.addons.includes('fireplace');
+    const tvw = tv.w ? tv.w / 12 : 0;
+    const tvh = tv.h ? tv.h / 12 : 0;
+    // TV centre: about 4.6 ft up; higher over a fireplace or a built-in.
+    const tvy = hasFire ? 2.6 + (p.addons.includes('mantel') ? 0.8 : 0.4) + tvh / 2 + 0.5 : look.builtin ? Math.max(4.6, 2.5 + tvh / 2 + 0.5) : 4.6;
+    const col = look.col ? Math.min(w - 2, Math.max(tvw, 4) + (look.col === 'oak' ? 1.2 : 2.5)) : 0;
+    const lit = p.light.includes('strips');
+    scalePreview(w, h, Math.max(tvy + tvh / 2, hasFire ? 2.6 : 0, p.addons.includes('shelves') ? 6.2 : 0) + 0.5);
+    room.style.cssText = `--w:${w};--h:${h};--tvw:${tvw};--tvh:${tvh};--tvy:${tvy};--col:${col};--sbw:${Math.min(tvw * 0.8 || 3, 3.6)};--fw:${Math.min(w * 0.6, 6)};--cw:${Math.min(w * 0.75, 10)}`;
+
+    let html = `<div class="pv-wall ${surface(look.wall)}"></div>`;
+    if (p.light.includes('slatled') && SLAT_TEX.includes(look.wall)) html += `<div class="pv-slatled"></div>`;
+    if (col) html += `<div class="pv-col ${surface(look.col)}"></div>`;
+    if (p.baseboard !== 'remove') html += `<div class="pv-base"></div>`;
+    if (look.builtin) html += `<div class="pv-builtin"></div>`;
+    if (p.addons.includes('console') || look.console) html += `<div class="pv-console${lit ? ' is-lit' : ''}"></div>`;
+    if (hasFire) html += `<div class="pv-fire"></div>`;
+    if (hasFire && p.addons.includes('mantel')) html += `<div class="pv-mantel"></div>`;
+    if (p.addons.includes('shelves')) {
+      // Three shelves each side, centred in the space beside the TV (or the centre column).
+      const inner = Math.max(tvw, col, 3) / 2 + 0.5;
+      const space = w / 2 - inner - 0.3;
+      if (space > 1.2) {
+        const sw = Math.min(2.6, space - 0.3);
+        const cx = inner + space / 2;
+        [3.6, 4.8, 6].forEach((y) => [-1, 1].forEach((side) => {
+          html += `<div class="pv-shelf${lit ? ' is-lit' : ''}" style="left:calc(${side * cx - sw / 2} * var(--ft));bottom:calc(${y} * var(--ft));width:calc(${sw} * var(--ft))"></div>`;
+        }));
+      }
+    }
+    if (tv.w) html += `<div class="pv-tv${p.light.includes('backlight') ? ' is-glow' : ''}"><span><b>${tv.name}</b>${Math.round(tv.w)}″ wide · ${Math.round(tv.h)}″ tall</span></div>`;
+    if (tv.w && p.addons.includes('soundbar')) html += `<div class="pv-sb"></div>`;
+    html += `<div class="pv-dim">${w} ft wall</div>`;
+    room.innerHTML = html;
+    pvCap.textContent = tv.w ? `Shown to scale: your ${tv.name} TV on a ${w} ft wall` : `Shown to scale: a ${w} ft wall`;
+    pvCeil.textContent = `Ceiling ${h} ft`;
+  }
+
+  // ----- Totals, quote links -----
+  const totalEl = document.querySelector('[data-total]');
+  const noteEl = document.querySelector('[data-total-note]');
+  const dockTotal = document.querySelector('[data-dock-total]');
+  const dockLabel = document.querySelector('[data-dock-label]');
+  const quoteBtn = document.querySelector('[data-quote]');
+  const waBtn = document.querySelector('[data-wa]');
+  let activePackage = null;
+  let pristine = true; // nothing picked yet: show the lowest price we offer
+
+  const waLink = (text) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+  waBtn.href = waLink('Hi DecorWall! I have a question about a wall.');
+
+  const lookName = (p) => p.style !== 'none' ? byId(STYLES, p.style).name : byId(PROJECTS, p.project).name;
+
+  function render() {
+    const p = readPick();
+    // A fireplace project already includes the fireplace.
+    const fireBox = form.querySelector('input[name="addons"][value="fireplace"]');
+    fireBox.disabled = p.project === 'fire';
+    // Options only shown where they apply.
+    form.querySelector('[data-group="finish"]').hidden = !hasSlats(p);
+    form.querySelector('[data-group="mount"]').hidden = p.tv === 'none';
+    form.querySelector('input[value="mantel"]').disabled = !(p.project === 'fire' || p.addons.includes('fireplace'));
+    form.querySelector('input[value="slatled"]').disabled = !hasSlats(p);
+    const q = quote(p);
+    const pkg = activePackage && byId(PACKAGES, activePackage);
+    const pkgPrice = pkg ? q.base : null;
+
+    let big, note;
+    if (q.byDesign) {
+      big = 'Priced by design';
+      note = q.extras ? `This style is priced after a design consultation. Selected extras add about ${money(q.extras)}.` : 'This style is priced after a design consultation.';
+    } else if (pkg) {
+      big = money(pkgPrice);
+      note = `${pkg.name} package: the extras come included (${money(q.total)} booked piece by piece, you save ${money(q.total - pkgPrice)}).`;
+    } else {
+      // The total for everything selected. "from" is only ever used for the lowest possible price.
+      const lowest = Math.min(...PROJECTS.map((x) => x.from), ...STYLES.filter((x) => x.from).map((x) => x.from));
+      big = pristine ? 'from ' + money(lowest) : money(q.total);
+      note = q.extras
+        ? `${lookName(p)} from ${money(q.base)}, plus ${money(q.extras)} in extras. Final price after a free design preview.`
+        : `${lookName(p)} from ${money(q.base)}, the lowest starting price. Final price after a free design preview.`;
+    }
+    totalEl.textContent = big;
+    noteEl.textContent = note;
+    dockTotal.textContent = big;
+    dockLabel.textContent = pkg ? `${pkg.name} package` : 'Your estimate';
+    const isStyle = p.style !== 'none';
+    quoteBtn.textContent = isStyle ? 'Get this style' : 'Get my quote';
+
+    const summary = [
+      'Hi DecorWall! I would like a quote:',
+      ...q.lines.map(([name]) => '• ' + name),
+      p.tv !== 'none' ? `• TV: ${byId(TVS, p.tv).name}` : null,
+      pkg ? `Package: ${pkg.name}` : null,
+      `Estimate on the site: ${big}`,
+    ].filter(Boolean).join('\n');
+    quoteBtn.href = waLink(summary);
+    syncForm(p, summary, big);
+    drawPreview(p);
+  }
+
+  // The estimate form further down picks up what was built here: the project chip, and the full
+  // selection with its estimate travels with the request.
+  const FORM_PROJECT = { media: 'TV Media Walls', slat: 'Walnut Slat Walls', stone: 'Stone & Marble Walls', fire: 'Electric Fireplace Walls', accent: 'Accent Walls & Decorative Panels' };
+  function syncForm(p, summary, big) {
+    const leadForm = document.querySelector('[data-form]');
+    if (!leadForm || pristine) return;
+    const chip = leadForm.querySelector(`input[name="service"][value="${FORM_PROJECT[p.project]}"]`);
+    if (chip) chip.checked = true;
+    leadForm.querySelector('[data-form-builder]').value = summary;
+    const note = document.querySelector('[data-form-built]');
+    note.hidden = false;
+    note.querySelector('span').textContent = `${lookName(p)}, ${byId(TVS, p.tv).w ? byId(TVS, p.tv).name + ' TV, ' : ''}${byId(WIDTHS, p.width).name} wall: ${big}`;
+  }
+
+  form.addEventListener('change', (e) => {
+    // A new project or style starts from its own slat finish.
+    if (e.target.name === 'project' || e.target.name === 'style') {
+      const p = readPick();
+      form.querySelector(`input[name="finish"][value="${defaultFinish(p.style, p.project)}"]`).checked = true;
+    }
+    activePackage = null;
+    pristine = false;
+    document.querySelectorAll('.pk-card').forEach((c) => c.classList.remove('is-picked'));
+    render();
+  });
+
+  // ----- Packages -----
+  const pkGrid = document.querySelector('[data-packages]');
+  pkGrid.innerHTML = PACKAGES.map((pk) => {
+    const q = quote({ ...DEFAULT_PICK, ...pk.pick });
+    return `
+      <article class="pk-card${pk.tag === 'Most popular' ? ' is-featured' : ''} reveal" data-pk="${pk.id}">
+        ${pk.tag ? `<span class="pk-tag">${pk.tag}</span>` : ''}
+        <div class="pk-img"><img src="${pk.img}" alt="" loading="lazy" style="object-position:${pk.pos}"></div>
+        <div class="pk-body">
+          <h3 class="pk-name">${pk.name}</h3>
+          <p class="pk-sub">${pk.sub}</p>
+          <ul class="pk-list">${q.lines.map(([name, v]) => `<li>${name}<span>${money(v)}</span></li>`).join('')}</ul>
+          <p class="pk-price"><s>${money(q.total)}</s><strong>${money(q.base)}</strong><span class="pk-save">Save ${money(q.total - q.base)}</span></p>
+          <button type="button" class="btn-primary pk-btn" data-pk-pick="${pk.id}">Choose ${pk.name}</button>
+        </div>
+      </article>`;
+  }).join('');
+  pkGrid.querySelectorAll('.reveal').forEach((el) => revealer.observe(el));
+  pkGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-pk-pick]');
+    if (!btn) return;
+    const pk = byId(PACKAGES, btn.dataset.pkPick);
+    setPick(pk.pick);
+    activePackage = pk.id;
+    pristine = false;
+    document.querySelectorAll('.pk-card').forEach((c) => c.classList.toggle('is-picked', c.dataset.pk === pk.id));
+    render();
+    smoothTo(document.getElementById('builder').getBoundingClientRect().top + window.scrollY - 110);
+  });
+
+  // ----- Bottom bar: opens only once the visitor has scrolled well into the builder (about two
+  // thirds of a screen past its top), and closes again after the packages.
+  const dock = document.querySelector('[data-dock]');
+  const costSec = document.getElementById('cost');
+  const pkSec = document.getElementById('packages');
+  const dockCheck = () => {
+    const y = window.scrollY;
+    const start = costSec.offsetTop + window.innerHeight * 0.66;
+    // On phones the bar leaves once the packages start, so they can be browsed with the whole screen.
+    const end = window.innerWidth <= 960 ? pkSec.offsetTop - window.innerHeight * 0.5 : pkSec.offsetTop + pkSec.offsetHeight - window.innerHeight * 0.5;
+    dock.classList.toggle('is-open', y > start && y < end);
+  };
+  // On phones the header slides away while the builder is on screen, so the pinned preview and the
+  // options get the whole screen; it comes back once the builder is left.
+  const calcBody = document.getElementById('builder');
+  const headerCheck = () => {
+    const r = calcBody.getBoundingClientRect();
+    const inCalc = window.innerWidth <= 960 && r.top < 70 && r.bottom > window.innerHeight * 0.4;
+    document.body.classList.toggle('in-calc', inCalc);
+  };
+  window.addEventListener('scroll', headerCheck, { passive: true });
+  window.addEventListener('resize', headerCheck);
+  window.addEventListener('scroll', dockCheck, { passive: true });
+  window.addEventListener('resize', dockCheck);
+  dockCheck();
+  // Start from a plain media wall at its published starting price.
+  setPick(DEFAULT_PICK);
+  activePackage = null;
+
+  window.addEventListener('resize', render);
+  render();
+</script>
+
+</body>
+</html>
