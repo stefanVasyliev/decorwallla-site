@@ -18,8 +18,6 @@ python3 site/build.py --preview  # preview/  relative links, opens straight from
 Lead forms post to hello@decorwallla.com via FormSubmit. dist/ is committed so every upload is tracked.
 
 ## Still to do
-- WhatsApp: set `WHATSAPP` in `site/build.py` (digits with country code). Until then the WhatsApp buttons open
-  WhatsApp with the message ready but no recipient.
 - Wall builder: the project and style starting prices are real; the add-on prices are placeholders at the top of
   the last `<script>` in `index.html`.
 - The home perks (Free / Custom / Local) and copy carried over from the old site should be checked.

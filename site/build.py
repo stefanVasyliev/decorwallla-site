@@ -22,7 +22,7 @@ PHONE = "(213) 913-5312"
 PHONE_TEL = "+12139135312"
 EMAIL = "hello@decorwallla.com"
 INSTAGRAM = "decorwallla"
-WHATSAPP = ""  # PLACEHOLDER: WhatsApp number, digits only with country code, e.g. 12139135312
+WHATSAPP = "12135211263"  # WhatsApp number, digits only with country code
 FORM_ACTION = "https://formsubmit.co/hello@decorwallla.com"
 ASSET_V = "20261031"
 
