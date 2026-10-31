@@ -12,10 +12,10 @@ Website for DecorWall LA: media walls, slat walls, stone and accent walls in Los
 
 ## Build
 ```
-python3 site/build.py            # dist/     clean URLs, upload this folder to the hosting
+python3 site/build.py            # dist/     clean URLs, upload this folder to Porkbun (FTP) as before
 python3 site/build.py --preview  # preview/  relative links, opens straight from the files
 ```
-Lead forms post to hello@decorwallla.com via FormSubmit.
+Lead forms post to hello@decorwallla.com via FormSubmit. dist/ is committed so every upload is tracked.
 
 ## Still to do
 - WhatsApp: set `WHATSAPP` in `site/build.py` (digits with country code). Until then the WhatsApp buttons open
