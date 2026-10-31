@@ -1,0 +1,771 @@
+/* DecorWall LA: styles shared by every page. Page-specific styles live with each page. */
+@font-face { font-family: 'Suisse Intl'; src: local('Suisse Intl Light'), local('SuisseIntl-Light'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Suisse Intl'; src: local('Suisse Intl'), local('Suisse Intl Regular'), local('SuisseIntl-Regular'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Suisse Intl'; src: local('Suisse Intl Medium'), local('SuisseIntl-Medium'); font-weight: 500; font-display: swap; }
+
+:root {
+  --sans: 'Suisse Intl', 'Geist', 'Helvetica Neue', Arial, sans-serif;
+  --serif: 'Instrument Serif', 'Times New Roman', serif;
+  --ink: #0e0e0e;
+  --white: #fff;
+  --muted: rgba(255, 255, 255, 0.72);
+  --line: rgba(255, 255, 255, 0.26);
+  --pad: clamp(20px, 4vw, 56px);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Wall change: a quick dip to black, then the new wall comes up. */
+  --dip-in: .22s;
+  --dip-out: .45s;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--white);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* No visible scrollbar; the page still scrolls normally. */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
+
+body.menu-open { overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* Header */
+.header {
+  position: fixed; inset: 0 0 auto; z-index: 50;
+  display: flex; align-items: center; gap: clamp(16px, 3vw, 40px);
+  padding: clamp(18px, 2.4vw, 30px) var(--pad);
+  transition: padding .5s var(--ease-out), background .5s var(--ease-out);
+}
+.header.is-scrolled {
+  padding-block: 14px;
+  background: rgba(14, 14, 14, 0.8);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+}
+.logo { font-size: clamp(18px, 1.5vw, 22px); font-weight: 500; letter-spacing: -0.02em; white-space: nowrap; }
+.nav { display: flex; gap: clamp(14px, 2vw, 32px); margin-left: auto; font-size: 14px; }
+.nav a { position: relative; color: var(--muted); transition: color .3s; }
+.nav a::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -4px; height: 1px; background: currentColor;
+  transform: scaleX(0); transform-origin: right; transition: transform .45s var(--ease-out);
+}
+.nav a:hover { color: var(--white); }
+.nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+/* Header button: the same slat-closing hover as the main buttons, at header size. */
+.cta.btn-primary { padding: 11px 20px; font-size: 14px; }
+
+.burger {
+  display: none; position: relative; width: 44px; height: 44px; margin-left: auto;
+  border: 1px solid var(--line); border-radius: 999px; background: rgba(255, 255, 255, 0.08); cursor: pointer;
+}
+.burger span { position: absolute; left: 13px; right: 13px; height: 1.5px; background: var(--white); transition: transform .4s var(--ease-out); }
+.burger span:first-child { top: 18px; }
+.burger span:last-child { top: 24px; }
+.menu-open .burger span:first-child { transform: translateY(3px) rotate(45deg); }
+.menu-open .burger span:last-child { transform: translateY(-3px) rotate(-45deg); }
+.menu {
+  position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; justify-content: center; gap: 6px;
+  padding: 100px var(--pad) 40px; background: rgba(14, 14, 14, 0.94); backdrop-filter: blur(20px);
+}
+.menu[hidden] { display: none; }
+.menu a { font-family: var(--serif); font-size: clamp(34px, 9vw, 52px); line-height: 1.15; }
+
+/* Two different weights of action. The primary one is a solid panel whose dark fill closes
+   in vertical slats on hover, like a slat wall; the secondary one is plain text. */
+@property --slat { syntax: '<length>'; inherits: false; initial-value: 0px; }
+.btn-primary {
+  --slat: 0px;
+  display: inline-flex; align-items: center;
+  padding: 19px 30px; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #2a2724 0 var(--slat), var(--white) var(--slat) 10px);
+  color: var(--ink); font-size: 15px; font-weight: 500; letter-spacing: -0.01em;
+  transition: --slat .55s var(--ease-out), color .35s var(--ease-out) .1s;
+}
+/* On dark backgrounds the closed slats are a warm charcoal with a white edge, so the button never disappears. */
+.btn-primary:hover { --slat: 10px; color: var(--white); box-shadow: inset 0 0 0 1px var(--white); }
+.btn-link {
+  display: inline-flex; align-items: center; gap: 10px; padding: 19px 4px;
+  color: var(--muted); font-size: 15px; font-weight: 400; letter-spacing: -0.01em;
+  transition: color .3s;
+}
+.btn-link:hover { color: var(--white); }
+/* WhatsApp: a quiet outlined partner to the primary button, green only in the icon. */
+.btn-wa {
+  display: inline-flex; align-items: center; gap: 10px; padding: 18px 22px; border: 1px solid var(--line); border-radius: 2px;
+  color: inherit; font-size: 15px; font-weight: 400; letter-spacing: -0.01em; white-space: nowrap; transition: border-color .3s;
+}
+.btn-wa:hover { border-color: currentColor; }
+.btn-wa svg { width: 18px; height: 18px; color: #25d366; }
+.btn-link svg { width: 16px; height: 16px; flex: none; transition: transform .45s var(--ease-out); }
+.btn-link:hover svg { transform: translateX(4px); }
+
+/* Bottom bar: the running estimate and quote button while the cost section is on screen;
+   the WhatsApp button stays in the corner everywhere. */
+.dock {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+  display: flex; align-items: center; justify-content: flex-end; gap: 14px;
+  padding: 14px var(--pad); pointer-events: none;
+}
+.dock::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: rgba(14, 14, 14, .82); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  opacity: 0; transition: opacity .5s var(--ease-out);
+}
+.dock-est { display: flex; align-items: center; gap: clamp(16px, 3vw, 40px); flex: 1; opacity: 0; transform: translateY(12px); transition: opacity .5s var(--ease-out), transform .5s var(--ease-out); }
+.dock.is-open::before { opacity: 1; }
+.dock.is-open .dock-est { opacity: 1; transform: none; pointer-events: auto; }
+.dock-sum { margin: 0; line-height: 1.2; }
+.dock-sum small { display: block; color: var(--muted); font-size: 12px; }
+.dock-sum strong { font-size: clamp(20px, 1.8vw, 26px); font-weight: 400; letter-spacing: -0.03em; white-space: nowrap; }
+.dock-btn { flex: 1; justify-content: center; max-width: 720px; margin-left: auto; padding-block: 16px; }
+.wa {
+  flex: none; display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%;
+  background: #25d366; color: #fff; pointer-events: auto; box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  transition: transform .3s var(--ease-out);
+}
+.wa:hover { transform: scale(1.06); }
+.wa svg { width: 28px; height: 28px; }
+
+/* Reveal on scroll */
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity 1s var(--ease-out), transform 1.1s var(--ease-out); }
+.reveal.is-in { opacity: 1; transform: none; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 1080px) {
+  .nav, .header > .cta { display: none; }
+  .burger { display: block; }
+}
+
+/* ------------------------------------------------------------------------------------------
+   Inner pages. Same language as the home page: dark by default, warm paper sections for air,
+   light-weight headings with one word in medium, thin rules instead of boxes, full photos.
+   ------------------------------------------------------------------------------------------ */
+.wrap { max-width: 1680px; margin: 0 auto; padding: 0 var(--pad); }
+.paper { --muted: rgba(14, 14, 14, .62); --line: rgba(14, 14, 14, .18); background: #efeae2; color: var(--ink); }
+.paper a:not(.btn-primary) { color: var(--ink); }
+.muted { color: var(--muted); }
+strong { font-weight: 500; }
+
+/* Page head */
+.ph { padding: clamp(116px, 13vw, 170px) 0 clamp(48px, 6vw, 80px); }
+.crumbs { display: flex; flex-wrap: wrap; gap: 6px 10px; margin: 0 0 clamp(24px, 3vw, 40px); color: rgba(255, 255, 255, .5); font-size: 13px; }
+.crumbs a { color: rgba(255, 255, 255, .5); transition: color .3s; }
+.crumbs a:hover { color: var(--white); }
+.crumbs span + span::before, .crumbs a + span::before, .crumbs a + a::before, .crumbs span + a::before { content: '/'; margin-right: 10px; opacity: .5; }
+.ph h1 { max-width: 16ch; margin: 0; font-size: clamp(40px, 5.6vw, 88px); font-weight: 300; line-height: .98; letter-spacing: -0.045em; }
+.ph h1 strong { font-weight: 500; }
+.ph .lede { max-width: 620px; margin: clamp(20px, 2.4vw, 30px) 0 0; color: var(--muted); font-size: clamp(16px, 1.25vw, 19px); font-weight: 300; line-height: 1.55; }
+.ph .from { margin: 18px 0 0; font-size: 15px; }
+.ph .from b { font-weight: 500; }
+.ph .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; margin-top: clamp(26px, 3vw, 38px); }
+.ph-img { margin: clamp(40px, 5vw, 72px) 0 0; aspect-ratio: 16 / 9; overflow: hidden; }
+.ph-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ph-img figcaption, .cap { margin-top: 10px; color: rgba(255, 255, 255, .45); font-size: 12px; }
+.paper .cap { color: rgba(14, 14, 14, .45); }
+
+/* Sections */
+.sec { padding: clamp(72px, 9vw, 130px) 0; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 60px; margin-bottom: clamp(32px, 4vw, 56px); }
+.h2 { max-width: 18ch; margin: 0; font-size: clamp(30px, 3.6vw, 56px); font-weight: 300; line-height: 1.02; letter-spacing: -0.04em; }
+.h2 strong { font-weight: 500; }
+.sec-head p { max-width: 440px; margin: 0; color: var(--muted); font-size: 15px; font-weight: 300; line-height: 1.55; }
+.h3 { margin: 0 0 12px; font-size: clamp(19px, 1.5vw, 23px); font-weight: 400; letter-spacing: -0.02em; }
+.prose { max-width: 720px; }
+.prose p { margin: 0 0 1.1em; color: var(--muted); font-size: clamp(16px, 1.2vw, 18px); font-weight: 300; line-height: 1.65; }
+.prose p:first-child { color: inherit; }
+.prose b { color: inherit; font-weight: 500; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(32px, 5vw, 80px); }
+
+/* Lists with a thin check */
+.checks { margin: 0; padding: 0; list-style: none; }
+.checks li { display: flex; gap: 14px; padding: 13px 0; border-top: 1px solid var(--line); font-size: 15px; line-height: 1.45; }
+.checks li:last-child { border-bottom: 1px solid var(--line); }
+.checks li::before { content: ''; flex: none; width: 9px; height: 5px; margin-top: 6px; border-left: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
+
+/* Cards: photo on top, text below, no boxes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 3vw, 40px) clamp(16px, 2vw, 28px); }
+.cards.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.card { display: flex; flex-direction: column; color: inherit; }
+.card-img { aspect-ratio: 16 / 10; overflow: hidden; background: #1a1714; }
+.card-img img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease-out); }
+.card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.card-name { margin: 0; font-size: clamp(19px, 1.5vw, 23px); font-weight: 400; letter-spacing: -0.025em; }
+.card-price { margin: 0; color: var(--muted); font-size: 14px; white-space: nowrap; }
+.card-text { margin: 8px 0 0; color: var(--muted); font-size: 14px; font-weight: 300; line-height: 1.5; }
+/* Text-only points */
+.points { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(24px, 3vw, 40px); margin: 0; padding: 0; list-style: none; counter-reset: pt; }
+.points li { padding-top: 18px; border-top: 1px solid var(--line); }
+.points li::before { counter-increment: pt; content: '0' counter(pt); display: block; margin-bottom: 26px; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.points h3 { margin: 0 0 10px; font-size: clamp(18px, 1.4vw, 21px); font-weight: 400; letter-spacing: -0.02em; }
+.points p { margin: 0; color: var(--muted); font-size: 14px; font-weight: 300; line-height: 1.55; }
+
+/* Prices */
+.prices { width: 100%; border-collapse: collapse; }
+.prices td { padding: 18px 0; border-top: 1px solid var(--line); font-size: clamp(16px, 1.3vw, 19px); vertical-align: baseline; }
+.prices tr:last-child td { border-bottom: 1px solid var(--line); }
+.prices td:nth-child(2) { color: var(--muted); white-space: nowrap; text-align: right; padding-left: 20px; }
+.prices td:last-child { width: 1%; white-space: nowrap; text-align: right; padding-left: 28px; }
+.small { color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+/* Links to cities and related pages: plain text in columns */
+.links { columns: 4 180px; column-gap: 28px; margin: 0; padding: 0; list-style: none; }
+.links li { padding: 7px 0; break-inside: avoid; font-size: 14px; }
+.links a { color: var(--muted); transition: color .3s; }
+.links a:hover { color: inherit; }
+.paper .links a { color: rgba(14, 14, 14, .62); }
+.paper .links a:hover { color: var(--ink); }
+
+/* FAQ */
+.faq { border-top: 1px solid var(--line); }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { display: flex; justify-content: space-between; gap: 24px; padding: 22px 0; cursor: pointer; list-style: none; font-size: clamp(16px, 1.3vw, 19px); letter-spacing: -0.01em; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: '+'; flex: none; color: var(--muted); font-size: 22px; line-height: 1; transition: transform .4s var(--ease-out); }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq p { max-width: 760px; margin: -6px 0 24px; color: var(--muted); font-size: 15px; font-weight: 300; line-height: 1.65; }
+
+
+/* Option groups and chips: the wall builder and the estimate form share them. */
+.opt { margin: 0 0 clamp(28px, 3vw, 40px); padding: 0; border: 0; min-width: 0; }
+.opt[hidden] { display: none; }
+.opt legend { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; padding: 0; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
+.opt legend small { color: rgba(255, 255, 255, 0.5); font-size: 13px; font-weight: 300; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { position: relative; cursor: pointer; }
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip span {
+  display: inline-flex; align-items: baseline; gap: 8px;
+  padding: 11px 16px; border: 1px solid var(--line); border-radius: 999px;
+  font-size: 14px; line-height: 1.25; letter-spacing: -0.01em;
+  transition: background .3s, color .3s, border-color .3s;
+}
+.chip span b { color: rgba(255, 255, 255, 0.5); font-weight: 400; transition: color .3s; }
+.chip:hover span { border-color: rgba(255, 255, 255, 0.6); }
+.chip input:checked + span { background: var(--white); border-color: var(--white); color: var(--ink); }
+.chip input:checked + span b { color: rgba(14, 14, 14, 0.55); }
+.chip input:focus-visible + span { outline: 1px solid var(--white); outline-offset: 3px; }
+.chip input:disabled + span { opacity: .35; cursor: default; }
+.opt-hint { margin: 10px 0 0; color: rgba(255, 255, 255, 0.5); font-size: 13px; line-height: 1.5; }
+
+/* Estimate form: the same option groups and chips as the wall builder, kept short. */
+.form { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 100px); }
+.form-intro p { max-width: 380px; margin: 20px 0 0; color: var(--muted); font-size: 15px; font-weight: 300; line-height: 1.6; }
+.form-intro .contact { margin-top: 28px; font-size: 15px; line-height: 1.9; }
+.form-intro .contact a { border-bottom: 1px solid var(--line); }
+.form-built { margin: 28px 0 0; padding: 16px 0 0; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.5; }
+.form-built small { display: block; margin-bottom: 4px; color: var(--muted); font-size: 12px; }
+.fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 24px; margin-bottom: clamp(28px, 3vw, 40px); }
+.field { display: flex; flex-direction: column; }
+.field.wide { grid-column: 1 / -1; }
+.field label { padding-top: 6px; color: var(--muted); font-size: 12px; letter-spacing: .02em; }
+.field input, .field textarea {
+  width: 100%; padding: 10px 0 12px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0;
+  background: none; color: inherit; font: inherit; font-size: 16px; outline: none; transition: border-color .3s;
+}
+.field textarea { min-height: 72px; resize: vertical; }
+.field input:focus, .field textarea:focus { border-color: currentColor; }
+.field input::placeholder, .field textarea::placeholder { color: rgba(255, 255, 255, .35); }
+/* Photos: a chip that opens the file picker and shows how many were added. */
+.file { position: relative; display: inline-flex; cursor: pointer; }
+.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.file > span { display: inline-flex; align-items: center; gap: 8px; padding: 11px 16px; border: 1px dashed var(--line); border-radius: 999px; font-size: 14px; transition: border-color .3s; }
+.file:hover > span { border-color: rgba(255, 255, 255, .6); }
+.file.has-files > span { border-style: solid; background: var(--white); color: var(--ink); }
+.file svg { width: 15px; height: 15px; }
+.form-send { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; margin-top: 8px; }
+.form-send button { border: 0; cursor: pointer; font-family: inherit; }
+.form-send .small { max-width: 360px; margin: 0; }
+
+/* Call to action band */
+.band { padding: clamp(80px, 10vw, 150px) 0; text-align: center; }
+.band .h2 { margin: 0 auto; max-width: 20ch; }
+.band p { max-width: 520px; margin: 20px auto 0; color: var(--muted); font-size: 16px; font-weight: 300; line-height: 1.6; }
+.band .actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 28px; margin-top: 34px; }
+.paper .btn-primary { background: repeating-linear-gradient(90deg, #efeae2 0 var(--slat), var(--ink) var(--slat) 10px); color: var(--white); }
+.paper .btn-primary:hover { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.paper .btn-link { color: var(--ink); }
+
+/* Footer */
+.foot { padding: clamp(64px, 8vw, 110px) 0 40px; border-top: 1px solid rgba(255, 255, 255, .12); }
+.foot-top { display: grid; grid-template-columns: minmax(0, 5fr) repeat(3, minmax(0, 2fr)); gap: 32px; }
+.foot-brand { margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; }
+.foot-top p { max-width: 340px; margin: 14px 0 0; color: var(--muted); font-size: 14px; font-weight: 300; line-height: 1.6; }
+.foot h4 { margin: 0 0 14px; color: rgba(255, 255, 255, .45); font-size: 12px; font-weight: 400; letter-spacing: .1em; text-transform: uppercase; }
+.foot ul { margin: 0; padding: 0; list-style: none; }
+.foot li { padding: 5px 0; font-size: 14px; }
+.foot li a { color: var(--muted); transition: color .3s; }
+.foot li a:hover { color: var(--white); }
+.foot-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; margin-top: clamp(48px, 6vw, 80px); padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, .12); color: rgba(255, 255, 255, .45); font-size: 12px; }
+.foot-bottom a { color: inherit; }
+
+@media (max-width: 1000px) {
+  .cards, .cards.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form, .two { grid-template-columns: 1fr; }
+  .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .foot-top { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .cards, .cards.four, .points, .fields { grid-template-columns: 1fr; }
+  .prices td:nth-child(2) { display: none; }
+}
+/* WhatsApp sits close to the button it partners with. */
+.ph .actions, .band .actions, .form-send { column-gap: 10px; }
+
+/* ------------------------------------------------------------------------------------------
+   Material feel. Light sections read like honed limestone: a warm base with soft clouding and
+   fine grain, faint enough to feel rather than see.
+   Dark sections are lit like a built wall at night: a hidden LED line that draws in along the
+   top edge as the section arrives, and a warm wash falling from it. Each one sits somewhere else.
+   ------------------------------------------------------------------------------------------ */
+:root {
+  --stone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .26 0 0 0 0 .2 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 260px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0035 .008' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .5 0 0 0 0 .42 0 0 0 .3 -.08'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E") 0 0 / 1000px, linear-gradient(170deg, #f1ece4, #e9e2d7);
+}
+.paper { background: var(--stone); }
+
+.glow { position: relative; isolation: isolate; }
+.glow::before, .glow::after { content: ''; position: absolute; z-index: -1; pointer-events: none; }
+.glow::before {
+  top: 0; left: var(--gx, 12%); width: var(--gw, 38%); height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 200, 140, .95) 30%, rgba(255, 214, 165, 1) 50%, rgba(255, 200, 140, .95) 70%, transparent);
+  box-shadow: 0 0 12px rgba(255, 170, 90, .55);
+  transform: scaleX(0); transition: transform 2.2s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.glow::after {
+  top: 0; left: calc(var(--gx, 12%) - 8%); width: calc(var(--gw, 38%) + 16%); height: min(70%, 520px);
+  background: radial-gradient(ellipse 50% 100% at 50% 0, rgba(255, 168, 88, .11), rgba(255, 168, 88, .03) 55%, transparent 80%);
+  opacity: 0; transition: opacity 2.6s ease .6s;
+}
+.glow.lit::before { transform: scaleX(1); }
+.glow.lit::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .glow::before { transform: none; transition: none; } .glow::after { opacity: 1; transition: none; } }
+
+/* Logo: the vector mark and wordmark, in white. */
+.logo { display: inline-flex; align-items: center; line-height: 0; }
+.logo img { display: block; width: auto; height: clamp(24px, 2vw, 30px); }
+.foot-brand img { display: block; width: auto; height: 34px; }
+
+/* ------------------------------------------------------------------ home blocks, each with its own form */
+
+/* What we build: big names to pick from; the chosen wall shows beside them, sized to the screen. */
+.idx { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 5vw, 80px); align-items: center; }
+.idx-list { margin: 0; padding: 0; list-style: none; }
+.idx-list button {
+  display: grid; grid-template-columns: 44px 1fr; align-items: baseline; gap: 12px; width: 100%;
+  padding: clamp(10px, 1.2vw, 16px) 0; border: 0; background: none; text-align: left; cursor: pointer;
+  color: rgba(14, 14, 14, .38); font: inherit; transition: color .4s, padding .5s var(--ease-out);
+}
+.idx-list button:hover { color: rgba(14, 14, 14, .7); }
+.idx-list button.is-on { color: var(--ink); padding-left: 14px; }
+.idx-n { font-size: 13px; font-variant-numeric: tabular-nums; }
+.idx-name { font-size: clamp(24px, 2.8vw, 44px); font-weight: 300; line-height: 1.05; letter-spacing: -0.04em; }
+.idx-list button.is-on .idx-name { font-weight: 400; }
+.idx-pics { position: relative; aspect-ratio: 16 / 11; max-height: 68vh; overflow: hidden; background: #1a1714; }
+.idx-pics figure { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity .7s ease; pointer-events: none; }
+.idx-pics figure.is-on { opacity: 1; pointer-events: auto; }
+.idx-pics img { width: 100%; height: 100%; object-fit: cover; }
+.idx-pics figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+  padding: clamp(18px, 2vw, 28px); color: var(--white); background: linear-gradient(transparent, rgba(10, 10, 10, .75));
+}
+.idx-pics figcaption span { font-size: 14px; color: rgba(255, 255, 255, .8); }
+.idx-pics figcaption b { display: block; margin-bottom: 4px; color: var(--white); font-size: clamp(18px, 1.5vw, 22px); font-weight: 400; letter-spacing: -0.02em; }
+.idx-pics .btn-primary { flex: none; padding: 14px 22px; }
+.paper .idx-pics .btn-primary { background: repeating-linear-gradient(90deg, #2a2724 0 var(--slat), var(--white) var(--slat) 10px); color: var(--ink); }
+.paper .idx-pics .btn-primary:hover { color: var(--white); box-shadow: inset 0 0 0 1px var(--white); }
+
+/* Why choose us: a bento of different sizes and materials. */
+.bento { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(220px, auto); gap: 10px; }
+.b-tile { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(22px, 2.4vw, 34px); }
+.b-tile h3 { position: relative; margin: 0 0 10px; font-size: clamp(20px, 1.7vw, 26px); font-weight: 400; letter-spacing: -0.025em; }
+.b-tile p { position: relative; max-width: 420px; margin: 0; font-size: 14px; font-weight: 300; line-height: 1.6; opacity: .72; }
+.b-photo { grid-column: span 2; grid-row: span 2; min-height: 460px; color: var(--white); }
+.b-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.b-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 35%, rgba(10, 10, 10, .8)); }
+.b-photo > div { position: relative; z-index: 1; }
+.b-stone { background: var(--stone); color: var(--ink); }
+.b-line { background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14); }
+.b-line::before { content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 1px; background: linear-gradient(90deg, transparent, #ffd6a5, transparent); box-shadow: 0 0 14px rgba(255, 170, 90, .7); }
+.b-line::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 70%; background: radial-gradient(ellipse 60% 100% at 50% 0, rgba(255, 168, 88, .16), transparent 75%); }
+.b-big { position: absolute; top: clamp(16px, 2vw, 26px); right: clamp(20px, 2.4vw, 32px); font-size: clamp(80px, 8vw, 130px); font-weight: 300; line-height: .8; letter-spacing: -0.06em; opacity: .14; }
+.b-slat { grid-column: span 3; min-height: 200px; color: var(--white); background: url(../images/textures/walnut-slat.webp) 0 0 / 260px 100% repeat-x; }
+.b-slat::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10, 10, 10, .78), rgba(10, 10, 10, .2)); }
+.paper .b-line, .paper .b-photo, .paper .b-slat { color: var(--white); }
+
+/* Start from a style: tall cards in a row you can swipe or step through. */
+.st-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 2vw, 28px) 14px; }
+@media (max-width: 1000px) { .st-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .st-row { grid-template-columns: 1fr; } }
+.st-card { color: inherit; }
+.st-img { aspect-ratio: 16 / 11; overflow: hidden; background: #1a1714; }
+.st-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease-out); }
+.st-meta { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; margin-top: 14px; }
+.st-n { grid-row: span 2; color: var(--muted); font-size: 13px; padding-top: 4px; }
+.st-meta h3 { margin: 0; font-size: 19px; font-weight: 400; letter-spacing: -0.02em; }
+.st-meta p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+
+/* Service areas: city names drifting in two slow rows. */
+.areas { overflow: hidden; }
+.marq { overflow: hidden; padding: 10px 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marq-track { display: flex; width: max-content; animation: marq 90s linear infinite; }
+.marq.rev .marq-track { animation-direction: reverse; animation-duration: 110s; }
+.marq:hover .marq-track { animation-play-state: paused; }
+.marq a { padding: 0 clamp(18px, 2vw, 32px); color: rgba(255, 255, 255, .28); font-size: clamp(32px, 4.4vw, 72px); font-weight: 300; letter-spacing: -0.04em; white-space: nowrap; transition: color .4s; }
+.marq a:hover { color: var(--white); }
+.marq.rev a { color: rgba(255, 255, 255, .16); }
+@keyframes marq { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .marq-track { animation: none; } }
+
+@media (max-width: 1000px) {
+  .idx { grid-template-columns: 1fr; }
+  .idx-pics { order: -1; aspect-ratio: 16 / 10; }
+  .bento { grid-template-columns: 1fr 1fr; }
+  .b-photo, .b-slat { grid-column: span 2; }
+}
+@media (max-width: 640px) {
+  .bento { grid-template-columns: 1fr; }
+  .b-photo, .b-slat { grid-column: auto; grid-row: auto; min-height: 360px; }
+}
+
+/* ==========================================================================================
+   Identity pass: no hairlines, no arrows. Structure comes from panels, materials and light,
+   the way a built wall is made of slats, stone and LED.
+   ========================================================================================== */
+
+/* Links get the slat mark from the logo instead of an arrow. */
+.mark { width: 18px; height: 16px; flex: none; transition: transform .45s var(--ease-out), opacity .3s; opacity: .85; }
+.btn-link:hover .mark, .why-more:hover .mark { transform: translateX(3px); opacity: 1; }
+
+/* Menu: on hover a short LED strip lights up under the word and shines downwards. */
+.nav a::before {
+  content: ''; position: absolute; left: 50%; bottom: -8px; width: calc(100% + 12px); height: 1px; margin-left: calc((100% + 12px) / -2);
+  border-radius: 1px; background: linear-gradient(90deg, transparent, #ffd9ad 18%, #fff1de 50%, #ffd9ad 82%, transparent);
+  box-shadow: 0 0 5px rgba(255, 190, 120, .7);
+  transform: scaleX(0); transition: transform .45s var(--ease-out); pointer-events: none;
+}
+.nav a::after {
+  left: -18px; right: -18px; top: calc(100% + 8px); bottom: auto; height: 34px;
+  background: radial-gradient(ellipse 55% 100% at 50% 0, rgba(255, 186, 112, .35), rgba(255, 186, 112, 0) 75%);
+  transform: none; opacity: 0; transition: opacity .5s ease .1s; pointer-events: none;
+}
+.nav a:hover { color: #fff; }
+.nav a:hover::before { transform: scaleX(1); }
+.nav a:hover::after { transform: none; opacity: 1; }
+
+/* Section glow: always centred, opening from the middle outwards. */
+.glow::before { left: 50%; width: min(46%, 640px); margin-left: calc(min(46%, 640px) / -2); transform: scaleX(0); transform-origin: center; }
+.glow::after { left: 50%; width: min(70%, 980px); margin-left: calc(min(70%, 980px) / -2); }
+
+/* No rules between things: spacing and panels instead. */
+.checks li, .checks li:last-child { border: 0; padding: 7px 0; }
+.checks li::before { width: 12px; height: 11px; margin-top: 4px; border: 0; transform: none;
+  background: currentColor; opacity: .55;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 16'%3E%3Cpath d='M1 1.5l3 .9v11.2l-3 .9zM5.6 2.9l2 .6v9l-2 .6zM9.2 4l1.8.5v7l-1.8.5zM12.6 5l1.6.5v5l-1.6.5zM15.8 6l1.4.4v3.2l-1.4.4z'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 16'%3E%3Cpath d='M1 1.5l3 .9v11.2l-3 .9zM5.6 2.9l2 .6v9l-2 .6zM9.2 4l1.8.5v7l-1.8.5zM12.6 5l1.6.5v5l-1.6.5zM15.8 6l1.4.4v3.2l-1.4.4z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.points li { padding: clamp(22px, 2.2vw, 30px); border: 0; background: rgba(255, 255, 255, .04); }
+.paper .points li { background: rgba(255, 255, 255, .42); }
+.points li::before { margin-bottom: 18px; font-size: clamp(34px, 3vw, 46px); font-weight: 300; letter-spacing: -0.04em; color: inherit; opacity: .25; }
+.prices { border-collapse: separate; border-spacing: 0 6px; }
+.prices td, .prices tr:last-child td { border: 0; padding: 20px 22px; background: rgba(255, 255, 255, .04); }
+.prices td:last-child { padding-left: 28px; }
+.faq { border: 0; display: grid; gap: 6px; }
+.faq details { border: 0; padding: 0 clamp(18px, 2vw, 28px); background: rgba(255, 255, 255, .04); }
+.paper .faq details { background: rgba(255, 255, 255, .45); }
+.faq details[open] { background: rgba(255, 255, 255, .07); }
+.paper .faq details[open] { background: rgba(255, 255, 255, .7); }
+.faq p { margin-bottom: 22px; }
+.field input, .field textarea { padding: 12px 14px; border: 0; background: rgba(255, 255, 255, .05); transition: background .3s, box-shadow .3s; }
+.field input:focus, .field textarea:focus { background: rgba(255, 255, 255, .08); box-shadow: 0 -10px 22px -14px rgba(255, 180, 100, .6) inset; }
+.field label { padding: 14px 0 8px; }
+.file > span { border-style: solid; }
+.form-built { border: 0; padding: 16px 18px; background: rgba(255, 255, 255, .05); }
+.form-intro .contact a { border: 0; }
+.foot { border: 0; }
+.foot-bottom { border: 0; padding-top: 0; }
+.crumbs span + span::before, .crumbs a + span::before, .crumbs a + a::before, .crumbs span + a::before { content: '\00b7'; }
+
+/* How it works: four tall slats. LED light comes on inside each one, in order. */
+.slats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.slats.reveal { opacity: 1; transform: none; }
+.slat {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: clamp(300px, 42vh, 440px); padding: clamp(20px, 2vw, 30px);
+  background: url(../images/textures/black-slat.webp) 0 0 / 260px 100% repeat-x, #141414;
+}
+.slat::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 55% at 50% 0, rgba(255, 176, 98, .38), rgba(255, 176, 98, .08) 55%, transparent 80%);
+  opacity: 0; transition: opacity 1.4s ease;
+}
+.slat::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(rgba(10, 10, 10, 0) 30%, rgba(10, 10, 10, .85));
+}
+.slat > * { position: relative; z-index: 1; }
+.slats.is-in .slat::before { opacity: 1; }
+.slats.is-in .slat:nth-child(2)::before { transition-delay: .5s; }
+.slats.is-in .slat:nth-child(3)::before { transition-delay: 1s; }
+.slats.is-in .slat:nth-child(4)::before { transition-delay: 1.5s; }
+.slat-n { position: absolute; top: clamp(18px, 2vw, 28px); left: clamp(20px, 2vw, 30px); font-size: 13px; opacity: .6; }
+.slat h3 { margin: 0 0 6px; font-size: clamp(26px, 2.6vw, 40px); font-weight: 300; letter-spacing: -0.04em; }
+.slat p { margin: 0; color: var(--muted); font-size: 14px; font-weight: 300; }
+
+/* Why choose us: four material samples, each lit from above. */
+.samples { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.sample {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+  aspect-ratio: 3 / 4; padding: clamp(20px, 2vw, 28px); color: var(--white);
+}
+.sample::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 45% at 50% 0, rgba(255, 196, 130, .3), transparent 75%), linear-gradient(rgba(10, 10, 10, 0) 40%, rgba(10, 10, 10, .72)); }
+.sample > * { position: relative; }
+.sample h3 { margin: 0 0 6px; font-size: clamp(22px, 2vw, 30px); font-weight: 400; letter-spacing: -0.03em; }
+.sample p { margin: 0; font-size: 14px; font-weight: 300; opacity: .8; }
+.s-walnut { background: url(../images/textures/walnut-slat.webp) 0 0 / 300px 100% repeat-x; }
+.s-oak { background: url(../images/textures/oak-slat.webp) 0 0 / 220px 100% repeat-x; }
+.s-black { background: url(../images/textures/black-slat.webp) 0 0 / 300px 100% repeat-x; }
+.s-stone { background: url(../images/textures/travertine.webp) 0 0 / 420px auto; }
+.s-stone::before { background: radial-gradient(ellipse 80% 45% at 50% 0, rgba(255, 210, 160, .35), transparent 75%), linear-gradient(rgba(30, 24, 18, 0) 35%, rgba(30, 24, 18, .7)); }
+
+@media (max-width: 1000px) {
+  .slats, .samples { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .slat { min-height: 220px; }
+  .sample { aspect-ratio: 4 / 3; }
+}
+
+/* Five cards: two large across the top, three below, so the grid has no gap. */
+.cards.five { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.cards.five > * { grid-column: span 2; }
+.cards.five > :nth-child(-n+2) { grid-column: span 3; }
+@media (max-width: 1000px) { .cards.five > *, .cards.five > :nth-child(-n+2) { grid-column: span 3; } .cards.five > :last-child { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .cards.five { grid-template-columns: 1fr; } .cards.five > *, .cards.five > :nth-child(-n+2), .cards.five > :last-child { grid-column: auto; } }
+
+/* How it works, step by step on one wall: each panel shows where the wall is at that stage. */
+.slat { background: #141414; }
+.slat::before { opacity: 1; background: none; transition: none; }
+.st-photo { background: url(../images/hero-1.webp) 50% 40% / cover; }
+.st-photo::before { background: linear-gradient(rgba(10, 10, 10, .15), rgba(10, 10, 10, .15)); }
+/* Design: the slat layout laid over the same photo, half transparent, like a design preview. */
+.st-design { background: url(../images/hero-1.webp) 50% 40% / cover; }
+.st-design::before {
+  inset: 14% 18% 22%;
+  background: url(../images/textures/walnut-slat.webp) 0 0 / 200px 100% repeat-x;
+  opacity: .55; box-shadow: 0 0 0 2000px rgba(10, 10, 10, .2);
+  transition: opacity 1.4s ease, inset 1.4s var(--ease-out);
+}
+.slats:not(.is-in) .st-design::before { opacity: 0; inset: 20% 24% 28%; }
+/* Build: the real material, unlit. */
+.st-build { background: url(../images/hero-5.webp) 50% 45% / cover; }
+.st-build::before { background: linear-gradient(rgba(10, 10, 10, .35), rgba(10, 10, 10, .35)); }
+/* Glow: the finished wall, and its light comes on. */
+.st-glow { background: url(../images/hero-3.webp) 50% 45% / cover; }
+.st-glow::before { background: rgba(10, 10, 10, .55); transition: opacity 1.6s ease .8s; }
+.slats.is-in .st-glow::before { opacity: 0; }
+.s-marble { background: url(styles/stone-marble.webp) 62% 50% / cover; }
+.s-clay { background: url(styles/roman-clay-minimalist.webp) 50% 40% / cover; }
+.st-design::before { opacity: .42; }
+
+/* Nothing on the site scrolls sideways. */
+html, body { overflow-x: clip; }
+
+/* Material samples: real material from the project photos, shown at its own size (never enlarged),
+   in shorter tiles. */
+.sample { aspect-ratio: auto; height: 200px; background-color: #1a1714; }
+.s-walnut { background: url(../images/hero-5.webp) -250px -420px / 2000px auto no-repeat; }
+.s-black { background: url(../images/hero-4.webp) -1380px -330px / 2000px auto no-repeat; }
+.s-oak { background: url(../images/hero-2.webp) -250px -290px / 2000px auto no-repeat; }
+.s-stone { background: url(../images/hero-2.webp) -850px -262px / 2000px auto no-repeat; }
+.s-marble { background: url(styles/stone-marble.webp) -1300px -260px / 2048px auto no-repeat; }
+.s-clay { background: url(styles/roman-clay-minimalist.webp) -560px -160px / 2048px auto no-repeat; }
+@media (max-width: 640px) { .sample { aspect-ratio: auto; height: 180px; } }
+
+/* Logo hover: warm LED light traces its outline, like a backlit sign. */
+.logo img { filter: drop-shadow(0 0 0 rgba(255, 190, 120, 0)); transition: filter .6s ease; }
+.logo:hover img { filter: drop-shadow(0 0 2px rgba(255, 214, 165, .95)) drop-shadow(0 0 7px rgba(255, 176, 98, .8)) drop-shadow(0 0 18px rgba(255, 160, 80, .45)); }
+
+/* Use the full width: three columns for the build section, lists and long text flow into columns. */
+.three { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 3fr); gap: clamp(32px, 4vw, 64px); }
+.three .prose { max-width: none; }
+.checks-wide .checks { columns: 3 260px; column-gap: clamp(24px, 3vw, 48px); }
+.checks-wide .checks li { break-inside: avoid; }
+.prose { max-width: none; columns: 2 380px; column-gap: clamp(40px, 5vw, 88px); }
+.prose p { break-inside: avoid; }
+.three .prose, .form .prose { columns: 1; }
+@media (max-width: 1000px) { .three { grid-template-columns: 1fr 1fr; } .three .prose { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .three { grid-template-columns: 1fr; } }
+
+/* Photos never zoom. On hover a warm light comes on over them from above, like the LED on a wall. */
+.card-img, .st-img, .pk-img { position: relative; }
+.card-img::after, .st-img::after, .pk-img::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 70% 55% at 50% 0, rgba(255, 190, 120, .35), rgba(255, 170, 90, .08) 55%, transparent 80%);
+  opacity: 0; transition: opacity .7s ease;
+}
+.card:hover .card-img::after, .st-card:hover .st-img::after, .pk-card:hover .pk-img::after { opacity: 1; }
+
+/* How it works: every panel opens in vertical slats, one after another; the last one then lights up. */
+@property --open { syntax: '<length>'; inherits: false; initial-value: 0px; }
+.slat {
+  --open: 0px;
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 var(--open), transparent var(--open) 36px);
+          mask-image: repeating-linear-gradient(90deg, #000 0 var(--open), transparent var(--open) 36px);
+  transition: --open 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.slats.is-in .slat { --open: 36px; }
+.slats.is-in .slat:nth-child(2) { transition-delay: .35s; }
+.slats.is-in .slat:nth-child(3) { transition-delay: .7s; }
+.slats.is-in .slat:nth-child(4) { transition-delay: 1.05s; }
+.st-design::before, .slats:not(.is-in) .st-design::before { opacity: .42; inset: 14% 18% 22%; transition: none; }
+.st-glow::before { transition: opacity 1.4s ease 2.1s; }
+@media (prefers-reduced-motion: reduce) { .slat { --open: 36px; transition: none; } }
+
+/* How we build: photo beside a short idea and two compact lists. */
+.build { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(32px, 4vw, 72px); align-items: center; }
+.build-img { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; background: #1a1714; }
+.build-img img { width: 100%; height: 100%; object-fit: cover; }
+.build-lead { margin: 0 0 clamp(28px, 3vw, 44px); font-size: clamp(19px, 1.6vw, 24px); font-weight: 300; line-height: 1.45; letter-spacing: -0.015em; }
+.build-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.build-lists .checks li { font-size: 14px; color: var(--muted); }
+/* What's included: small panels in a row. */
+.incl { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.incl li { display: flex; flex-direction: column; gap: 22px; padding: 20px 18px; background: rgba(255, 255, 255, .045); font-size: 14px; line-height: 1.4; }
+.paper .incl li { background: rgba(255, 255, 255, .5); }
+.incl .mark { opacity: .6; }
+@media (max-width: 1000px) { .build { grid-template-columns: 1fr; } .incl { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .build-lists, .incl { grid-template-columns: 1fr 1fr; } }
+
+/* How it works: one wall in one frame, moving through the steps. */
+.wf-frame { position: relative; aspect-ratio: 21 / 9; max-height: 64vh; width: 100%; overflow: hidden; background: #141414; }
+.wf-layer { position: absolute; inset: 0; background-position: 50% 42%; background-size: cover; opacity: 0;
+  --open: 0px; -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 var(--open), transparent var(--open) 40px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 var(--open), transparent var(--open) 40px);
+  transition: --open 1.1s cubic-bezier(0.65, 0, 0.35, 1), opacity 0s linear 1.1s; }
+.wf-layer.is-on { opacity: 1; --open: 40px; transition: --open 1.1s cubic-bezier(0.65, 0, 0.35, 1), opacity 0s; z-index: 1; }
+.wf-layer.was-on { opacity: 1; --open: 40px; z-index: 0; }
+.wf-photo { background-image: url(../images/hero-1.webp); }
+/* The sketch: the finished wall as a pale drawing over the bare room. */
+.wf-design { background-image: url(../images/hero-5.webp); filter: grayscale(1) contrast(1.6) brightness(1.35); }
+.wf-build { background-image: url(../images/hero-5.webp); }
+.wf-glow { background-image: url(../images/hero-3.webp); }
+.wf-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+.wf-steps button { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; width: 100%; padding: 14px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; opacity: .4; transition: opacity .5s; }
+.wf-steps button.is-on, .wf-steps button:hover { opacity: 1; }
+.wf-steps span { grid-row: span 2; font-size: 13px; padding-top: 5px; }
+.wf-steps b { font-size: clamp(20px, 1.8vw, 28px); font-weight: 300; letter-spacing: -0.03em; }
+.wf-steps em { font-style: normal; font-size: 13px; opacity: .7; }
+.wf-steps button.is-on b { text-shadow: 0 0 16px rgba(255, 190, 120, .55); }
+@media (max-width: 640px) { .wf-frame { aspect-ratio: 4 / 3; } .wf-steps { grid-template-columns: 1fr 1fr; } }
+
+/* Page head with a photo: text on the left, the photo on the right, the whole head in one screen. */
+.ph-split { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding: 110px 0 56px; }
+.ph-split .wrap { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 4vw, 72px); align-items: center; width: 100%; }
+.ph-split h1 { font-size: clamp(38px, 4.4vw, 72px); }
+.ph-split .ph-img { position: relative; margin: 0; width: 100%; aspect-ratio: auto; height: min(calc(100svh - 170px), 760px); }
+.ph-split .ph-img figcaption { position: absolute; left: 14px; bottom: 12px; margin: 0; color: rgba(255, 255, 255, .7); font-size: 12px; }
+@media (max-width: 900px) {
+  .ph-split { min-height: 0; display: block; padding-top: 110px; }
+  .ph-split .wrap { grid-template-columns: 1fr; }
+  .ph-split .ph-img { aspect-ratio: 16 / 10; height: auto; max-height: none; }
+}
+
+/* What we build, with walls and styles in two groups. */
+.idx-group { margin: 22px 0 6px; color: rgba(14, 14, 14, .45); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.idx-group:first-child { margin-top: 0; }
+.idx-list button { grid-template-columns: 1fr; padding: 6px 0; }
+.idx-name { font-size: clamp(20px, 2vw, 32px); }
+.idx { align-items: start; }
+.idx-pics { position: sticky; top: 100px; }
+
+.idx { align-items: center; }
+.idx-list button { padding: 8px 0; }
+.idx-name { font-size: clamp(26px, 2.8vw, 44px); }
+
+/* How it works as a film: the caption sits in the middle of the frame and changes with each step. */
+.wf-frame { cursor: pointer; }
+.wf-shade { position: absolute; inset: 0; z-index: 2; background: radial-gradient(ellipse 50% 60% at 50% 50%, rgba(10, 10, 10, .55), rgba(10, 10, 10, .15) 70%); pointer-events: none; }
+.wf-cap { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--white); text-align: center; pointer-events: none;
+  opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .9s var(--ease-out); }
+.wf-cap.is-on { opacity: 1; transform: none; transition-delay: .35s; }
+.wf-cap span { font-size: 13px; letter-spacing: .14em; opacity: .75; }
+.wf-cap b { font-size: clamp(56px, 8vw, 132px); font-weight: 300; line-height: .95; letter-spacing: -0.05em; text-shadow: 0 0 40px rgba(255, 180, 100, .35); }
+.wf-cap em { font-style: normal; font-size: clamp(15px, 1.2vw, 18px); font-weight: 300; opacity: .85; }
+.wf-steps { display: none; }
+
+/* A calmer film: slower slat changes and captions. */
+.wf-layer { transition: --open 1.8s cubic-bezier(0.65, 0, 0.35, 1), opacity 0s linear 1.8s; }
+.wf-layer.is-on { transition: --open 1.8s cubic-bezier(0.65, 0, 0.35, 1), opacity 0s; }
+.wf-cap { transition: opacity 1s ease, transform 1.4s var(--ease-out); }
+.wf-cap.is-on { transition-delay: .7s; }
+
+/* What we build rows: name, then price and a View button that appear on the chosen row. */
+.idx-row { display: flex; align-items: center; gap: 18px; }
+.idx-row button { width: auto; flex: none; }
+.idx-price, .idx-go { opacity: 0; transform: translateX(-8px); transition: opacity .4s, transform .5s var(--ease-out); pointer-events: none; }
+.idx-row.is-on .idx-price, .idx-row.is-on .idx-go { opacity: 1; transform: none; pointer-events: auto; }
+.idx-price { color: rgba(14, 14, 14, .55); font-size: 14px; white-space: nowrap; }
+.idx-go { margin-left: auto; padding: 10px 18px; background: var(--ink); color: var(--white) !important; font-size: 14px; white-space: nowrap; transition: opacity .4s, transform .5s var(--ease-out), box-shadow .3s; }
+.idx-go:hover { box-shadow: 0 0 0 1px var(--ink), 0 6px 18px -6px rgba(255, 170, 90, .7); }
+.idx-pics .idx-pic { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; pointer-events: none; }
+.idx-pics .idx-pic.is-on { opacity: 1; pointer-events: auto; }
+
+/* View sits right after the price as a quiet link, in the same line. */
+.idx-go { margin-left: 0; display: inline-flex; align-items: center; gap: 8px; padding: 6px 0; background: none; color: var(--ink) !important; font-size: 14px; }
+.idx-go:hover { box-shadow: none; text-shadow: 0 0 12px rgba(255, 170, 90, .5); }
+.idx-go .mark { width: 15px; height: 13px; }
+
+/* How it works, calm: four words in a row, no pictures; each warms up in turn. */
+.calm { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(24px, 3vw, 56px); margin: 0; padding: clamp(10px, 2vw, 30px) 0; list-style: none; }
+.calm.reveal { opacity: 1; transform: none; }
+.calm li { display: flex; flex-direction: column; gap: 10px; }
+.calm span { font-size: 13px; opacity: .5; font-variant-numeric: tabular-nums; }
+.calm b { font-size: clamp(40px, 4.6vw, 76px); font-weight: 300; line-height: 1; letter-spacing: -0.045em; opacity: .35; transition: opacity 1.2s ease, text-shadow 1.2s ease; }
+.calm em { font-style: normal; font-size: 15px; font-weight: 300; opacity: .65; }
+.calm.is-in b { opacity: 1; text-shadow: 0 0 28px rgba(255, 180, 100, .35); }
+.calm.is-in li:nth-child(2) b { transition-delay: .5s; }
+.calm.is-in li:nth-child(3) b { transition-delay: 1s; }
+.calm.is-in li:nth-child(4) b { transition-delay: 1.5s; }
+@media (max-width: 800px) { .calm { grid-template-columns: 1fr 1fr; row-gap: 40px; } }
+
+/* How it works: smaller words under a quiet heading, and a brighter light coming up on each. */
+#how .h2 { font-size: clamp(22px, 1.8vw, 28px); font-weight: 300; letter-spacing: -0.02em; opacity: .7; }
+#how .h2 strong { font-weight: 400; }
+.calm b { font-size: clamp(34px, 3.6vw, 58px); opacity: .12; color: #fff; text-shadow: none;
+  transition: opacity 1.4s ease, text-shadow 1.6s ease, color 1.6s ease; }
+.calm.is-in b { opacity: 1; color: #fff4e6;
+  text-shadow: 0 0 6px rgba(255, 220, 180, .9), 0 0 22px rgba(255, 180, 100, .75), 0 0 60px rgba(255, 160, 80, .45); }
+.calm em { opacity: 0; transform: translateY(6px); transition: opacity 1s ease, transform 1.2s var(--ease-out); }
+.calm.is-in em { opacity: .7; transform: none; }
+.calm.is-in li:nth-child(1) em { transition-delay: .5s; }
+.calm.is-in li:nth-child(2) b { transition-delay: .7s; } .calm.is-in li:nth-child(2) em { transition-delay: 1.2s; }
+.calm.is-in li:nth-child(3) b { transition-delay: 1.4s; } .calm.is-in li:nth-child(3) em { transition-delay: 1.9s; }
+.calm.is-in li:nth-child(4) b { transition-delay: 2.1s; } .calm.is-in li:nth-child(4) em { transition-delay: 2.6s; }
+
+/* Section LED line runs the full width of the screen, with the wash under it full width too. */
+.glow::before { left: 0; width: 100%; margin-left: 0; background: linear-gradient(90deg, rgba(255, 200, 140, .25), rgba(255, 210, 160, .95) 20%, #ffe0b8 50%, rgba(255, 210, 160, .95) 80%, rgba(255, 200, 140, .25)); }
+.glow::after { left: 0; width: 100%; margin-left: 0; background: linear-gradient(rgba(255, 168, 88, .1), rgba(255, 168, 88, .03) 45%, transparent 80%); }
+
+/* What we build on phones: a grid of tiles instead of the hover list. */
+.idx-m { display: none; }
+@media (max-width: 900px) {
+  .idx { display: none; }
+  .idx-m { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 10px; margin: 0; padding: 0; list-style: none; }
+  .idx-m li:first-child { grid-column: 1 / -1; }
+  .idx-m a { display: flex; flex-direction: column; color: var(--ink); }
+  .idx-m-img { display: block; aspect-ratio: 4 / 3; overflow: hidden; background: #1a1714; }
+  .idx-m li:first-child .idx-m-img { aspect-ratio: 16 / 10; }
+  .idx-m img { width: 100%; height: 100%; object-fit: cover; }
+  .idx-m b { margin-top: 10px; font-size: 17px; font-weight: 400; letter-spacing: -0.02em; }
+  .idx-m small { margin-top: 2px; color: rgba(14, 14, 14, .55); font-size: 13px; }
+}
+
+/* Mobile menu in the site's own typeface. */
+.menu a { font-family: var(--sans); font-size: clamp(30px, 8vw, 44px); font-weight: 300; letter-spacing: -0.035em; }
+/* A slightly larger logo on phones. */
+@media (max-width: 700px) { .logo img { height: 32px; } }
